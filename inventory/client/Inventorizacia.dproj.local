@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.875,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\USelect.pas=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.652,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\Inventorizacia.dproj=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.875,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\USelect.dfm=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.746,=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2024.01.26 21:48:44.441,=C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\Unit1.pas</Transaction>
+    <Transaction>2024.01.26 21:49:23.731,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\USpisokTMC.pas=C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\Unit1.pas</Transaction>
+    <Transaction>2024.01.26 21:49:23.731,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\USpisokTMC.dfm=C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\клиент\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

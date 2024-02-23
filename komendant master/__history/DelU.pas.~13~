@@ -1,0 +1,109 @@
+unit DelU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.DB, Data.SqlExpr, Data.FMTBcd,
+  MemDS, DBAccess, Uni, MySQLUniProvider;
+
+type
+  TFMDel = class(TForm)
+  CBOtkuda: TComboBox;
+  CBKogo: TComboBox;
+  Label1: TLabel;
+  Label2: TLabel;
+  Button1: TButton;
+  Button2: TButton;
+  UniConnection1: TUniConnection;
+  UniQuery1: TUniQuery;
+  UniQuery2: TUniQuery;
+  procedure Button2Click(Sender: TObject);
+  procedure CBOtkudaChange(Sender: TObject);
+  procedure Button1Click(Sender: TObject);
+  procedure FormShow(Sender: TObject);
+private
+{ Private declarations }
+  FTableName: string;
+public
+{ Public declarations }
+end;
+
+var
+  FMDel: TFMDel;
+
+implementation
+
+{$R *.dfm}
+
+//Удаление и закрытие окна
+procedure TFMDel.Button1Click(Sender: TObject);
+begin
+  UniQuery1.SQL.Text := 'DELETE FROM `' + FTableName + '` WHERE `ФИО сотрудника` = :fio';
+  UniQuery1.Params.ParamByName('fio').AsString := CBKogo.Text;
+  UniQuery1.Execute;
+  CBKogo.Enabled:=false;
+  CBKogo.Items.Clear;
+  CBKogo.Text:='ФИО сотрудника для удаления';
+  Close;
+end;
+
+//Просто закрытие окна
+procedure TFMDel.Button2Click(Sender: TObject);
+begin
+  Close;
+end;
+
+//Отобразить список сотрудников в зависимости от выбора группы заселения
+procedure TFMDel.CBOtkudaChange(Sender: TObject);
+var
+  Query: TUniQuery;
+  List: TStringList;
+begin
+  Query:=nil;
+  CBKogo.Enabled:=true;
+  FTableName := '';
+  case CBOtkuda.ItemIndex of
+    0:
+    begin
+      // Выбран первый пункт, выводим список из таблицы balki
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `balki`';
+      FTableName := 'balki';
+    end;
+    1:
+    begin
+      // Выбран третий пункт, выводим список из таблицы obchaga
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `obchaga`';
+      FTableName := 'obchaga';
+    end;
+  end;
+
+  List := TStringList.Create;
+  try
+    if Assigned(Query) then
+    begin
+      Query.Connection := UniConnection1;
+      Query.Open;
+      while not Query.Eof do
+      begin
+        List.Add(Query.FieldByName('ФИО сотрудника').AsString);
+        Query.Next;
+      end;
+      List.Sort;
+      CBKogo.Items.Assign(List);
+      Query.Close;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TFMDel.FormShow(Sender: TObject);
+begin
+  CBOtkuda.ItemIndex:=-1;
+  CBOtkuda.Text:='Выберите место проживания';
+end;
+
+end.

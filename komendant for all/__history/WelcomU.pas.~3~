@@ -1,0 +1,43 @@
+unit WelcomU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TFMWelcom = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Label1: TLabel;
+    Button4: TButton;
+    procedure Button4Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMWelcom: TFMWelcom;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU;
+
+procedure TFMWelcom.Button3Click(Sender: TObject);
+begin
+  FMZaselenie.ShowModal;
+end;
+
+procedure TFMWelcom.Button4Click(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+end.

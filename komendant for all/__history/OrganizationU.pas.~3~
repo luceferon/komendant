@@ -1,0 +1,46 @@
+unit OrganizationU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TFMOrganization = class(TForm)
+    ComboBox1: TComboBox;
+    Button1: TButton;
+    Button2: TButton;
+    procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMOrganization: TFMOrganization;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU;
+
+procedure TFMOrganization.Button1Click(Sender: TObject);
+begin
+  case chekgrid of
+    1: FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row]:= ComboBox1.Text;
+    2: FMZaselenie.StringGrid3.Cells[FMZaselenie.StringGrid3.Col, FMZaselenie.StringGrid3.Row]:= ComboBox1.Text;
+    3: FMZaselenie.StringGrid2.Cells[FMZaselenie.StringGrid2.Col, FMZaselenie.StringGrid2.Row]:= ComboBox1.Text;
+  end;
+  Close;
+end;
+
+procedure TFMOrganization.Button2Click(Sender: TObject);
+begin
+  Close;
+end;
+
+end.

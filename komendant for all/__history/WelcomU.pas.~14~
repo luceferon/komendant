@@ -1,0 +1,88 @@
+unit WelcomU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, AdvLockApp, ShellAPI, urlmon;
+
+type
+  TFMWelcom = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Label1: TLabel;
+    Button4: TButton;
+    Button5: TButton;
+    AdvLockApp1: TAdvLockApp;
+    procedure Button4Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMWelcom: TFMWelcom;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU, NewU, DelU, OtpuskU, PereselenieU;
+
+
+
+procedure TFMWelcom.Button1Click(Sender: TObject);
+begin
+  FMNew.ShowModal;
+end;
+
+procedure TFMWelcom.Button2Click(Sender: TObject);
+begin
+  FMDel.ShowModal;
+end;
+
+procedure TFMWelcom.Button3Click(Sender: TObject);
+begin
+  FMZaselenie.ShowModal;
+end;
+
+procedure TFMWelcom.Button4Click(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+procedure TFMWelcom.Button5Click(Sender: TObject);
+begin
+  FMPereselenie.ShowModal;
+end;
+
+procedure TFMWelcom.FormShow(Sender: TObject);
+var
+  FilePath, DFilePath: string;
+  CurrentVersion: TDateTime;
+  UpdateVersion: TDateTime;
+begin
+  AdvLockApp1.Lock;
+  DFilePath:= '\\192.168.28.2\smb_share\!!набор софта на полигонный сервер\Общий софт\';
+  FilePath := '\\192.168.28.2\smb_share\!!набор софта на полигонный сервер\Общий софт\Kommendant.exe';
+  CurrentVersion := FileAge(ParamStr(0));
+  UpdateVersion := FileAge(FilePath);
+
+  if UpdateVersion > CurrentVersion then
+  begin
+    // Обновление требуется
+    if MessageDlg('Доступна новая версия программы! Хотите скачать ее?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    begin
+      ShellExecute(0, 'open', PChar('explorer.exe'), PChar(DFilePath), nil, SW_SHOW);
+    end;
+  end;
+end;
+
+end.

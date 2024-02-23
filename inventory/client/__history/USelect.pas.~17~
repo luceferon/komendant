@@ -1,0 +1,104 @@
+unit USelect;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ToolPanels, Vcl.ExtCtrls,
+  AdvPageControl, Vcl.ComCtrls, AdvSmoothButton, AdvMetroButton, W7Classes,
+  W7Buttons, AdvGlowButton, Vcl.StdCtrls, AeroButtons;
+
+type
+  TFMSelect = class(TForm)
+    AdvPageControl1: TAdvPageControl;
+    AdvTabSheet1: TAdvTabSheet;
+    AdvTabSheet2: TAdvTabSheet;
+    AdvTabSheet3: TAdvTabSheet;
+    AdvGlowButton1: TAdvGlowButton;
+    AdvGlowButton2: TAdvGlowButton;
+    AdvGlowButton3: TAdvGlowButton;
+    AdvGlowButton4: TAdvGlowButton;
+    AdvGlowButton5: TAdvGlowButton;
+    AdvGlowButton6: TAdvGlowButton;
+    AdvGlowButton7: TAdvGlowButton;
+    AdvGlowButton8: TAdvGlowButton;
+    AdvGlowButton9: TAdvGlowButton;
+    AdvGlowButton10: TAdvGlowButton;
+    AdvGlowButton12: TAdvGlowButton;
+    AdvGlowButton13: TAdvGlowButton;
+    AdvGlowButton14: TAdvGlowButton;
+    AdvGlowButton15: TAdvGlowButton;
+    AdvGlowButton16: TAdvGlowButton;
+    AdvGlowButton17: TAdvGlowButton;
+    AdvGlowButton18: TAdvGlowButton;
+    AdvGlowButton19: TAdvGlowButton;
+    AdvGlowButton20: TAdvGlowButton;
+    AdvGlowButton21: TAdvGlowButton;
+    AdvGlowButton22: TAdvGlowButton;
+    AdvGlowButton23: TAdvGlowButton;
+    AdvGlowButton24: TAdvGlowButton;
+    AdvGlowButton25: TAdvGlowButton;
+    AdvGlowButton26: TAdvGlowButton;
+    AdvGlowButton27: TAdvGlowButton;
+    AdvGlowButton28: TAdvGlowButton;
+    AdvGlowButton29: TAdvGlowButton;
+    AdvGlowButton30: TAdvGlowButton;
+    AdvGlowButton31: TAdvGlowButton;
+    AdvGlowButton32: TAdvGlowButton;
+    AdvGlowButton33: TAdvGlowButton;
+    AdvGlowButton34: TAdvGlowButton;
+    AdvGlowButton36: TAdvGlowButton;
+    AdvGlowButton37: TAdvGlowButton;
+    AdvGlowButton39: TAdvGlowButton;
+    AdvGlowButton40: TAdvGlowButton;
+    AdvGlowButton41: TAdvGlowButton;
+    AdvGlowButton43: TAdvGlowButton;
+    AdvGlowButton54: TAdvGlowButton;
+    AdvGlowButton59: TAdvGlowButton;
+    AdvGlowButton61: TAdvGlowButton;
+    AdvGlowButton69: TAdvGlowButton;
+    AdvGlowButton71: TAdvGlowButton;
+    AdvGlowButton72: TAdvGlowButton;
+    AdvGlowButton73: TAdvGlowButton;
+    AdvGlowButton75: TAdvGlowButton;
+    AdvGlowButton86: TAdvGlowButton;
+    AdvGlowButton91: TAdvGlowButton;
+    AdvGlowButton11: TAdvGlowButton;
+    procedure AdvGlowButton2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure AdvGlowButton18Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMSelect: TFMSelect;
+  pomechenie: string;
+
+implementation
+
+uses
+  USpisokTMC;
+
+{$R *.dfm}
+
+procedure TFMSelect.AdvGlowButton18Click(Sender: TObject);
+begin
+  pomechenie:='balok2';
+  FMSpisokTMC.ShowModal;
+end;
+
+procedure TFMSelect.AdvGlowButton2Click(Sender: TObject);
+begin
+  pomechenie:='balok1';
+  FMSpisokTMC.ShowModal;
+end;
+
+procedure TFMSelect.FormCreate(Sender: TObject);
+begin
+  pomechenie:='';
+end;
+
+end.

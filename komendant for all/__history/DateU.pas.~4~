@@ -1,0 +1,57 @@
+unit DateU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.WinXPickers;
+
+type
+  TFMDate = class(TForm)
+    Button2: TButton;
+    Button1: TButton;
+    DatePicker1: TDatePicker;
+    procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMDate: TFMDate;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU;
+
+procedure TFMDate.Button1Click(Sender: TObject);
+begin
+  case chekgrid of
+    1: FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row]:= DateToStr(DatePicker1.Date);
+    2: FMZaselenie.StringGrid3.Cells[FMZaselenie.StringGrid3.Col, FMZaselenie.StringGrid3.Row]:= DateToStr(DatePicker1.Date);
+    3: FMZaselenie.StringGrid2.Cells[FMZaselenie.StringGrid2.Col, FMZaselenie.StringGrid2.Row]:= DateToStr(DatePicker1.Date);
+  end;
+
+  FMDate.Close;
+end;
+
+procedure TFMDate.Button2Click(Sender: TObject);
+begin
+  FMDate.CloseModal;
+end;
+
+procedure TFMDate.FormShow(Sender: TObject);
+begin
+  case chekgrid of
+    1: StrToDate(DatePicker1.Date) := FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row];
+    2: StrToDate(DatePicker1.Date) := FMZaselenie.StringGrid3.Cells[FMZaselenie.StringGrid3.Col, FMZaselenie.StringGrid3.Row];
+    3: StrToDate(DatePicker1.Date) := FMZaselenie.StringGrid2.Cells[FMZaselenie.StringGrid2.Col, FMZaselenie.StringGrid2.Row];
+  end;
+end;
+
+end.

@@ -1,0 +1,54 @@
+unit TelefoneU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask;
+
+type
+  TFMTelefon = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    Phone1: TMaskEdit;
+    Phone2: TMaskEdit;
+    Phone3: TMaskEdit;
+    procedure Button2Click(Sender: TObject);
+    procedure Phone1Change(Sender: TObject);
+    procedure Phone2Change(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMTelefon: TFMTelefon;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFMTelefon.Button2Click(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TFMTelefon.FormShow(Sender: TObject);
+begin
+  phone2.Enabled:=false;
+  phone3.Enabled:=false;
+end;
+
+procedure TFMTelefon.Phone1Change(Sender: TObject);
+begin
+  phone2.Enabled:=true;
+end;
+
+procedure TFMTelefon.Phone2Change(Sender: TObject);
+begin
+  phone3.Enabled:=true;
+end;
+
+end.

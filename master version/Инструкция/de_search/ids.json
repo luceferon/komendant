@@ -1,0 +1,13 @@
+{
+	"1": ["Программа ... Требуется Advanced-лицензия!", "index.htm", []],
+	"2": ["1. Главный мод... Требуется Advanced-лицензия!", "glavnyj_modul_upravleniya.htm", []],
+	"3": ["1.1. Главное... Требуется Advanced-лицензия!", "glavnoe_okno_modulya.htm", [1]],
+	"4": ["1.1.1. Заселение со... Требуется Advanced-лицензия!", "zaselenie_sotrudnika_na_uchastok.htm", [1,3]],
+	"5": ["1.1.2. Выселе... Требуется Advanced-лицензия!", "vyselenie_sotrudnika.htm", [1,3]],
+	"6": ["1.1.3. Просмотр сот... Требуется Advanced-лицензия!", "prosmotr_sotrudnikov_na_uchastke.htm", [1,3]],
+	"7": ["1.1.3.1. Экспо... Требуется Advanced-лицензия!", "ehksport_sotrudnikov.htm", [1,3,6]],
+	"8": ["1.1.3.2. Докум... Требуется Advanced-лицензия!", "dokumenty_na_otpusk.htm", [1,3,6]],
+	"9": ["1.1.3.3. Подготовка и... Требуется Advanced-лицензия!", "podgotovka_i_pechat_spiskov_na_zp.htm", [1,3,6]],
+	"10": ["1.1.4. Пересел... Требуется Advanced-лицензия!", "pereselit_sotrudnika.htm", [1,3]],
+	"11": ["2. Общий мод... Требуется Advanced-лицензия!", "obshchij_modul_prosmotra.htm", []]
+}

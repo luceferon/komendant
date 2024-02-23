@@ -1,0 +1,106 @@
+unit OtpuskU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, DBAccess, Uni, MemDS,
+  Vcl.StdCtrls;
+
+type
+  TFMOtpusk = class(TForm)
+    Label1: TLabel;
+    CBOtkuda: TComboBox;
+    Label2: TLabel;
+    CBKogo: TComboBox;
+    Button1: TButton;
+    Button2: TButton;
+    UniQuery1: TUniQuery;
+    UniQuery2: TUniQuery;
+    UniConnection1: TUniConnection;
+    procedure Button2Click(Sender: TObject);
+    procedure CBOtkudaChange(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+  private
+    FTableName: string;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMOtpusk: TFMOtpusk;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFMOtpusk.Button1Click(Sender: TObject);
+begin
+  UniQuery1.SQL.Text := 'DELETE FROM `' + FTableName + '` WHERE `ФИО сотрудника` = :fio';
+  UniQuery1.Params.ParamByName('fio').AsString := CBKogo.Text;
+  UniQuery1.Execute;
+  CBKogo.Enabled:=false;
+  CBKogo.Items.Clear;
+  CBKogo.Text:='ФИО сотрудника для удаления';
+  Close;
+end;
+
+procedure TFMOtpusk.Button2Click(Sender: TObject);
+begin
+  FMOtpusk.CloseModal;
+end;
+
+procedure TFMOtpusk.CBOtkudaChange(Sender: TObject);
+var
+  Query: TUniQuery;
+  List: TStrings;
+begin
+  Query:=nil;
+  CBKogo.Enabled:=true;
+  FTableName := '';
+  case CBOtkuda.ItemIndex of
+    0:
+    begin
+      // Выбран первый пункт, выводим список из таблицы balki
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `balki`';
+      FTableName := 'balki';
+    end;
+    1:
+    begin
+      // Выбран второй пункт, выводим список из таблицы itr
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `itr`';
+      FTableName := 'itr';
+    end;
+    2:
+    begin
+      // Выбран третий пункт, выводим список из таблицы obchaga
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `obchaga`';
+      FTableName := 'obchaga';
+    end;
+  end;
+
+  List := TStringList.Create;
+  try
+    if Assigned(Query) then
+    begin
+      Query.Connection := UniConnection1;
+      Query.Open;
+      while not Query.Eof do
+      begin
+        List.Add(Query.FieldByName('ФИО сотрудника').AsString);
+        Query.Next;
+      end;
+      CBKogo.Items.Assign(List);
+      Query.Close;
+    end;
+  finally
+    List.Free;
+  end;
+
+end;
+
+end.

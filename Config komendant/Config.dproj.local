@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.297,=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.725,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\ProzivanieU.dfm=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit2.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.779,=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.489,=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.457,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Config.dproj=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.226,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\ServerU.pas=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.226,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\ServerU.dfm=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.726,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\mestaU.dfm=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit3.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.726,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\mestaU.pas=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.725,C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\ProzivanieU.pas=C:\Users\xluci\OneDrive\Рабочий стол\Config komendant\Unit2.pas</Transaction>
+  </Transactions>
+</BorlandProject>

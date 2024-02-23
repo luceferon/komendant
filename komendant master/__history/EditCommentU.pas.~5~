@@ -1,0 +1,58 @@
+unit EditCommentU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TFMEditComment = class(TForm)
+    Edit1: TEdit;
+    Button1: TButton;
+    Button2: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMEditComment: TFMEditComment;
+//  chekgrid:integer;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU;
+
+procedure TFMEditComment.Button1Click(Sender: TObject);
+begin
+  case chekgrid of
+    1: FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row]:= Edit1.Text;
+    2: FMZaselenie.StringGrid3.Cells[FMZaselenie.StringGrid3.Col, FMZaselenie.StringGrid3.Row]:= Edit1.Text;
+    3: FMZaselenie.StringGrid2.Cells[FMZaselenie.StringGrid2.Col, FMZaselenie.StringGrid2.Row]:= Edit1.Text;
+  end;
+
+  FMEditComment.Close;
+end;
+
+procedure TFMEditComment.Button2Click(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TFMEditComment.FormShow(Sender: TObject);
+begin
+  case chekgrid of
+    1: Edit1.Text := FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row];
+    2: Edit1.Text := FMZaselenie.StringGrid3.Cells[FMZaselenie.StringGrid3.Col, FMZaselenie.StringGrid3.Row];
+    3: Edit1.Text := FMZaselenie.StringGrid2.Cells[FMZaselenie.StringGrid2.Col, FMZaselenie.StringGrid2.Row];
+  end;
+end;
+
+end.

@@ -1,0 +1,232 @@
+unit PereselenieU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.DB, MemDS, DBAccess,
+  Uni;
+
+type
+  TFMPereselenie = class(TForm)
+    CBOtkuda: TComboBox;
+    CBKogo: TComboBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    CBKuda1: TComboBox;
+    CBKomnata: TComboBox;
+    Label3: TLabel;
+    Label4: TLabel;
+    Button1: TButton;
+    Button2: TButton;
+    UniConnection1: TUniConnection;
+    UniQuery1: TUniQuery;
+    UniQuery2: TUniQuery;
+    procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure CBOtkudaChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure CBKogoChange(Sender: TObject);
+    procedure CBKuda1Change(Sender: TObject);
+    procedure CBKomnataChange(Sender: TObject);
+  private
+    { Private declarations }
+    FTableName, FtableNamekuda: string;
+  public
+    { Public declarations }
+  end;
+
+var
+  FMPereselenie: TFMPereselenie;
+
+implementation
+
+{$R *.dfm}
+var
+  fiosotrud, komnata:string;
+
+procedure TFMPereselenie.Button1Click(Sender: TObject);
+var
+  query: TUniQuery;
+begin
+{Переделать процедуру
+1- ищем строку "ФИО" в таблице FTableName и запоминаем значение каждого столбика из данной строки
+Столбик ФИО в переменную FIOSotrudnika, Столбик Комментарий в переменную Comment,
+Столбик Дата заезда в переменную Datazaezda, столбик должность в переменную dolznost,
+столбик организация в переменную org, столбик телефоны в переменную tel.
+2- ищем строку "ФИО" в таблице FTableName и удаляем всю строку из базы
+3- Записываем в таблицу FtableNamekuda значения переменных из первого пункта+ в столбец номер комнаты берем из переменной komnata
+}
+
+
+  UniQuery1.SQL.Text := 'DELETE FROM `' + FTableName + '` WHERE `ФИО сотрудника` = :fio';
+  UniQuery1.Params.ParamByName('fio').AsString := CBKogo.Text;
+  UniQuery1.Execute;
+  CBKogo.Enabled:=false;
+  CBKogo.Items.Clear;
+  CBKogo.Text:='ФИО сотрудника для удаления';
+  try
+
+        query := TUniQuery.Create(nil);
+
+        query.Connection := UniConnection1;
+
+
+        query.SQL.Text := 'SELECT * FROM ' + tabl;
+        query.Open;
+
+
+        query.Append;
+        if (tabl = 'balki') then
+        begin
+          query.FieldByName('Номер балка').AsString := CBnomer.Text;
+          query.FieldByName('Кол-во мест').AsString := Label8.Caption;
+          query.FieldByName('Организация').AsString := CBOrganization.Text;
+          if zap=1 then
+            query.FieldByName('Контактный телефон').AsString := Phone1.Text;
+          if zap=2 then
+            query.FieldByName('Контактный телефон').AsString :=Phone1.Text+', '+ Phone2.Text;
+          if zap=3 then
+            query.FieldByName('Контактный телефон').AsString := Phone1.Text+', '+ Phone2.Text+', '+ Phone3.Text;
+        end else
+          if (tabl = 'obchaga') then
+          begin
+            query.FieldByName('Номер комнаты').AsString := CBnomer.Text;
+            query.FieldByName('Кол-во мест').AsString := Label8.Caption;
+            query.FieldByName('Организация').AsString := CBOrganization.Text;
+            if zap=1 then
+              query.FieldByName('Контактный телефон').AsString := Phone1.Text;
+            if zap=2 then
+              query.FieldByName('Контактный телефон').AsString :=Phone1.Text+', '+ Phone2.Text;
+            if zap=3 then
+              query.FieldByName('Контактный телефон').AsString := Phone1.Text+', '+ Phone2.Text+', '+ Phone3.Text;
+          end;
+
+        query.FieldByName('ФИО сотрудника').AsString := Efio.Text;
+        query.FieldByName('Комментарий').AsString := Ecomment.Text;
+        query.FieldByName('Дата заезда(отпуска)').AsString :=datetostr(DPzaezd.Date);
+        query.FieldByName('Должность').AsString := CBprof.Text;
+        query.Post;
+
+
+
+  Close;
+end;
+
+procedure TFMPereselenie.Button2Click(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TFMPereselenie.CBKogoChange(Sender: TObject);
+begin
+  CBKuda1.Enabled:= true;
+  fiosotrud:=CBKogo.Text;
+end;
+
+procedure TFMPereselenie.CBKomnataChange(Sender: TObject);
+begin
+  komnata:=CBKomnata.Text;
+end;
+
+procedure TFMPereselenie.CBKuda1Change(Sender: TObject);
+var
+  UniQuery1: TUniQuery;
+begin
+   CBKomnata.Enabled:=true;
+  FtableNamekuda:='';
+  case CBkuda1.ItemIndex of
+   0: begin
+    FtableNamekuda:='balki';
+    // Подключение к базе данных MySQL
+    UniConnection1.Connect;
+
+    // Выборка уникальных значений из таблицы "balki"
+     UniQuery1 := TUniQuery.Create(nil);
+     UniQuery1.Connection := UniConnection1;
+     UniQuery1.SQL.Text := 'SELECT DISTINCT `Номер балка` FROM `balki`';
+     UniQuery1.Open;
+
+     // Заполнение ComboBox2 полученными значениями
+     CBKomnata.Clear;
+     while not UniQuery1.Eof do
+     begin
+       CBKomnata.Items.Add(UniQuery1.FieldByName('Номер балка').AsString);
+       UniQuery1.Next;
+     end;
+
+   end;
+   1: begin
+    FtableNamekuda:='obchaga';
+    // Подключение к базе данных MySQL
+    UniConnection1.Connect;
+
+     // Выборка уникальных значений из таблицы "obchaga"
+     UniQuery1 := TUniQuery.Create(nil);
+     UniQuery1.Connection := UniConnection1;
+     UniQuery1.SQL.Text := 'SELECT DISTINCT `Номер комнаты` FROM `obchaga`';
+     UniQuery1.Open;
+
+     // Заполнение ComboBox2 полученными значениями
+     CBKomnata.Clear;
+     while not UniQuery1.Eof do
+     begin
+       CBKomnata.Items.Add(UniQuery1.FieldByName('Номер комнаты').AsString);
+       UniQuery1.Next;
+     end;
+
+   end;
+  end;
+end;
+
+procedure TFMPereselenie.CBOtkudaChange(Sender: TObject);
+var
+  Query: TUniQuery;
+  List: TStrings;
+begin
+  Query:=nil;
+  CBKogo.Enabled:=true;
+  FTableName := '';
+  case CBOtkuda.ItemIndex of
+    0:
+    begin
+      // Выбран первый пункт, выводим список из таблицы balki
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `balki`';
+      FTableName := 'balki';
+    end;
+    1:
+    begin
+      // Выбран третий пункт, выводим список из таблицы obchaga
+      Query := UniQuery2;
+      Query.SQL.Text := 'SELECT `ФИО сотрудника` FROM `obchaga`';
+      FTableName := 'obchaga';
+    end;
+  end;
+
+  List := TStringList.Create;
+  try
+    if Assigned(Query) then
+    begin
+      Query.Connection := UniConnection1;
+      Query.Open;
+      while not Query.Eof do
+      begin
+        List.Add(Query.FieldByName('ФИО сотрудника').AsString);
+        Query.Next;
+      end;
+      CBKogo.Items.Assign(List);
+      Query.Close;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TFMPereselenie.FormShow(Sender: TObject);
+begin
+  CBOtkuda.ItemIndex:=-1;
+  CBOtkuda.Text:='Выберите место проживания';
+end;
+
+end.

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.623,=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.160,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\invent_confU.pas=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.132,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\invent_conf.dproj=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.160,C:\Users\xluci\OneDrive\Рабочий стол\Комендант инвенторизация\invent_confU.dfm=C:\Users\xluci\OneDrive\Документы\Embarcadero\Studio\Projects\Unit2.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,249 @@
+unit ServerU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, DBAccess, Uni, Vcl.StdCtrls, MySQLUniProvider,
+  MemDS, inifiles, cabfiles, System.NetEncoding;
+
+type
+  TForm1 = class(TForm)
+    Edit1: TEdit;
+    Edit2: TEdit;
+    Edit3: TEdit;
+    Button1: TButton;
+    UniConnection1: TUniConnection;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Button2: TButton;
+    Button3: TButton;
+    Edit4: TEdit;
+    Label4: TLabel;
+    Button4: TButton;
+    UniQuery1: TUniQuery;
+    Button5: TButton;
+    CABFile1: TCABFile;
+    Edit5: TEdit;
+    Label5: TLabel;
+    Label6: TLabel;
+    Edit6: TEdit;
+    Label7: TLabel;
+    Edit7: TEdit;
+    Label8: TLabel;
+    Edit8: TEdit;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  conn:boolean;
+  balki, obchaga:integer;
+  serverDB, userDB, passDB, DB, FileServer: string;
+  Con: TUniConnection;
+  Query: TUniQuery;
+
+implementation
+
+uses
+  prozivanieU, mestaU;
+
+
+{$R *.dfm}
+
+function EncryptString(const AStr: string): string;
+var
+  Enc: TNetEncoding;
+begin
+  Enc := TBase64Encoding.Create; // Создаем объект для кодирования в Base64
+  try
+    Result := Enc.Encode(AStr); // Кодируем исходную строку
+  finally
+    Enc.Free;
+  end;
+end;
+
+procedure CreateHiddenFolder(const Path: string);
+var
+  SecurityAttributes: TSecurityAttributes;
+  Folder: string;
+begin
+  Folder := IncludeTrailingPathDelimiter(Path) + 'komendant';
+
+  // Установка атрибутов, чтобы папка была скрытой
+  SecurityAttributes.nLength := SizeOf(SecurityAttributes);
+  SecurityAttributes.lpSecurityDescriptor := nil;
+  SecurityAttributes.bInheritHandle := True;
+
+  // Создание папки с установленными атрибутами
+  CreateDirectory(PChar(Folder), @SecurityAttributes);
+  SetFileAttributes(PChar(Folder), FILE_ATTRIBUTE_HIDDEN);
+end;
+
+procedure CreateMariaDBDatabase(const Server, UserName, Password: string; const DatabaseName: string);
+var
+  Connection: TUniConnection;
+  Query: TUniQuery;
+begin
+  Connection := TUniConnection.Create(nil);
+  try
+    Connection.ProviderName := 'MySQL';
+    Connection.Server := Server;
+    Connection.Username := UserName;
+    Connection.Password := Password;
+    Connection.Database := '';
+
+    Query := TUniQuery.Create(nil);
+    try
+      Query.Connection := Connection;
+
+      // Создание базы данных
+      Query.SQL.Text := 'CREATE DATABASE ' + DatabaseName;
+      Query.ExecSQL;
+
+      ShowMessage('База данных успешно создана!');
+    finally
+      Query.Free;
+    end;
+  finally
+    Connection.Free;
+  end;
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+     // Устанавливаем параметры подключения к базе данных
+  UniConnection1.Server := Edit1.Text;
+  UniConnection1.Username := Edit2.Text;
+  UniConnection1.Password := Edit3.Text;
+
+  try
+    // Пытаемся установить соединение с базой данных
+    UniConnection1.Connected := True;
+
+    // Если соединение установлено успешно, выводим сообщение
+    ShowMessage('Соединение установлено');
+    conn:=true;
+    Button2.Enabled:=true;
+    Edit1.Enabled:=false;
+    Edit2.Enabled:=false;
+    Edit3.Enabled:=false;
+  except
+    // Если произошла ошибка при подключении, выводим сообщение
+    ShowMessage('Ошибка при установке соединения');
+    conn:=false;
+    Button2.Enabled:=false;
+  end;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+   DB:='komendant';
+   CreateMariaDBDatabase(Edit1.Text, Edit2.Text, Edit3.Text, DB);
+   Button1.Enabled:=false;
+   Button3.Enabled:=true;
+   serverDB:=edit1.Text;
+   userDB:=edit2.Text;
+   passDB:=Edit3.Text;
+   // Создаем и настраиваем объект подключения
+   Con := TUniConnection.Create(nil);
+   Con.ProviderName := 'MySQL';
+   Con.Server := serverDB;
+   Con.Database := DB;
+   Con.Username := userDB;
+   Con.Password := passDB;
+   Con.Connect;
+
+   try
+    // Создаем таблицу "balki"
+    Query := TUniQuery.Create(nil);
+    Query.Connection := Con;
+    Query.SQL.Text := 'CREATE TABLE IF NOT EXISTS balki (' +
+                      'Номер VARCHAR(255), ' +
+                      'Кол_во_мест VARCHAR(255), ' +
+                      'ФИО_сотрудника VARCHAR(255), ' +
+                      'Комментарий VARCHAR(255), ' +
+                      'Дата_заезда_отпуска VARCHAR(255), ' +
+                      'Должность VARCHAR(255), ' +
+                      'Организация VARCHAR(255), ' +
+                      'Контактный_телефон VARCHAR(255))';
+    Query.ExecSQL;
+        // Создаем таблицу "obchaga"
+    Query.SQL.Text := 'CREATE TABLE IF NOT EXISTS obchaga (' +
+                      'Номер VARCHAR(255), ' +
+                      'Кол_во_мест VARCHAR(255), ' +
+                      'ФИО_сотрудника VARCHAR(255), ' +
+                      'Комментарий VARCHAR(255), ' +
+                      'Дата_заезда_отпуска VARCHAR(255), ' +
+                      'Должность VARCHAR(255), ' +
+                      'Организация VARCHAR(255), ' +
+                      'Контактный_телефон VARCHAR(255))';
+    Query.ExecSQL;
+   finally
+    Con.Close;
+   end;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  Form2.ShowModal;
+  Button4.Enabled:=true;
+  Edit4.Enabled:=false;
+  Button2.Enabled:=false;
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+   Form3.ShowModal;
+   Button5.Enabled:=true;
+   Button3.Enabled:=false;
+   Edit6.Enabled:=true;
+   Edit7.Enabled:=true;
+   Edit8.Enabled:=true;
+end;
+
+procedure TForm1.Button5Click(Sender: TObject);
+var
+  Ini: Tinifile;
+  ESS, ESU, ESP, ESDB, ESUch, ESFS, ESK, ESSys, ESNach: string;
+begin
+  CreateHiddenFolder('\\'+ Edit5.Text + '\smb_share');
+  ESS := EncryptString(serverDB);
+  ESU := EncryptString(userDB);
+  ESP := EncryptString(passDB);
+  ESDB := EncryptString(DB);
+  ESUch := EncryptString(Edit4.Text);
+  ESFS := EncryptString(Edit5.Text);
+  ESK := EncryptString(Edit6.Text);
+  ESSys := EncryptString(Edit7.Text);
+  ESNach := EncryptString(Edit8.Text);
+  //CreateHiddenFolder('C:\Program Files');
+  //CreateDir('C:\Program Files\komendant');
+  Ini:=TiniFile.Create(extractfilepath(paramstr(0))+'conf.ini');
+  Ini.WriteString('Connection',EncryptString('Server'),ESS);
+  Ini.WriteString('Connection',EncryptString('User'),ESU);
+  Ini.WriteString('Connection',EncryptString('Password'),ESP);
+  Ini.WriteString('Connection',EncryptString('DB'),ESDB);
+  Ini.WriteString('Uchastok',EncryptString('Uchastok'),ESUch);
+  Ini.WriteString('Uchastok',EncryptString('FileServ'),ESFS);
+  Ini.WriteString('Uchastok',EncryptString('Kladovchik'),ESK);
+  Ini.WriteString('Uchastok',EncryptString('SysAdmin'),ESSys);
+  Ini.WriteString('Uchastok',EncryptString('NachUch'),ESNach);
+  Ini.Free;
+  CABFile1.CABFile:=extractfilepath(paramstr(0))+'conf.cab';
+  CABFile1.GetContents;
+  CABFile1.TargetPath:='\\'+ Edit5.Text + '\smb_share\komendant\';
+  CABFile1.ExtractAll;
+  Application.Terminate;
+end;
+
+end.

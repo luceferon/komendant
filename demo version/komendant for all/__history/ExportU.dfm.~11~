@@ -1,0 +1,197 @@
+object FMExport: TFMExport
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = #1069#1082#1089#1087#1086#1088#1090' '#1089#1086#1090#1088#1091#1076#1085#1080#1082#1086#1074
+  ClientHeight = 382
+  ClientWidth = 494
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Button1: TButton
+    Left = 8
+    Top = 100
+    Width = 75
+    Height = 25
+    Caption = #1069#1082#1089#1087#1086#1088#1090
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object CheckListBox1: TCheckListBox
+    Left = 8
+    Top = -24
+    Width = 156
+    Height = 118
+    ItemHeight = 13
+    Items.Strings = (
+      ''
+      ''
+      #1060#1048#1054
+      #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
+      #1044#1072#1090#1072' '#1079#1072#1077#1079#1076#1072' ('#1086#1090#1087#1091#1089#1082#1072')'
+      #1055#1088#1086#1092#1077#1089#1089#1080#1103
+      #1054#1088#1075#1072#1085#1080#1079#1072#1094#1080#1103
+      #1058#1077#1083#1077#1092#1086#1085#1099)
+    TabOrder = 1
+  end
+  object StringGrid4: TStringGrid
+    Left = 192
+    Top = 3
+    Width = 275
+    Height = 120
+    TabOrder = 2
+    Visible = False
+  end
+  object Button2: TButton
+    Left = 89
+    Top = 100
+    Width = 75
+    Height = 25
+    Caption = #1054#1090#1084#1077#1085#1072
+    TabOrder = 3
+    OnClick = Button2Click
+  end
+  object DBAdvSearchEdit1: TDBAdvSearchEdit
+    Left = 104
+    Top = 248
+    Width = 300
+    Height = 21
+    Appearance.CategoryFont.Charset = DEFAULT_CHARSET
+    Appearance.CategoryFont.Color = clWindowText
+    Appearance.CategoryFont.Height = -11
+    Appearance.CategoryFont.Name = 'Tahoma'
+    Appearance.CategoryFont.Style = []
+    Appearance.DescriptionFont.Charset = DEFAULT_CHARSET
+    Appearance.DescriptionFont.Color = clWindowText
+    Appearance.DescriptionFont.Height = -11
+    Appearance.DescriptionFont.Name = 'Tahoma'
+    Appearance.DescriptionFont.Style = []
+    Appearance.FilterCountFont.Charset = DEFAULT_CHARSET
+    Appearance.FilterCountFont.Color = clWindowText
+    Appearance.FilterCountFont.Height = -11
+    Appearance.FilterCountFont.Name = 'Tahoma'
+    Appearance.FilterCountFont.Style = []
+    Appearance.FilterCountFormat = '(%d)'
+    Appearance.ItemCategoryFont.Charset = DEFAULT_CHARSET
+    Appearance.ItemCategoryFont.Color = 42495
+    Appearance.ItemCategoryFont.Height = -11
+    Appearance.ItemCategoryFont.Name = 'Tahoma'
+    Appearance.ItemCategoryFont.Style = []
+    Appearance.ItemCategoryFormat = 'in %s'
+    Categories = <>
+    CategoryButton.Appearance.BorderColor = 13948116
+    CategoryButton.Appearance.BorderColorHot = 15917525
+    CategoryButton.Appearance.BorderColorCheckedHot = 14925219
+    CategoryButton.Appearance.BorderColorDown = 14925219
+    CategoryButton.Appearance.BorderColorChecked = 15914434
+    CategoryButton.Appearance.BorderColorDisabled = 13948116
+    CategoryButton.Appearance.ColorTo = clNone
+    CategoryButton.Appearance.ColorChecked = 15914434
+    CategoryButton.Appearance.ColorCheckedTo = clNone
+    CategoryButton.Appearance.ColorDisabled = clWhite
+    CategoryButton.Appearance.ColorDisabledTo = clNone
+    CategoryButton.Appearance.ColorDown = 14925219
+    CategoryButton.Appearance.ColorDownTo = clNone
+    CategoryButton.Appearance.ColorHot = 15917525
+    CategoryButton.Appearance.ColorHotTo = clNone
+    CategoryButton.Appearance.ColorMirror = clWhite
+    CategoryButton.Appearance.ColorMirrorTo = clNone
+    CategoryButton.Appearance.ColorMirrorHot = 15917525
+    CategoryButton.Appearance.ColorMirrorHotTo = clNone
+    CategoryButton.Appearance.ColorMirrorDown = 14925219
+    CategoryButton.Appearance.ColorMirrorDownTo = clNone
+    CategoryButton.Appearance.ColorMirrorChecked = 15914434
+    CategoryButton.Appearance.ColorMirrorCheckedTo = clNone
+    CategoryButton.Appearance.ColorMirrorDisabled = clWhite
+    CategoryButton.Appearance.ColorMirrorDisabledTo = clNone
+    CategoryButton.Appearance.GradientHot = ggVertical
+    CategoryButton.Appearance.GradientMirrorHot = ggVertical
+    CategoryButton.Appearance.GradientDown = ggVertical
+    CategoryButton.Appearance.GradientMirrorDown = ggVertical
+    CategoryButton.Appearance.GradientChecked = ggVertical
+    CategoryButton.Appearance.TextColorChecked = 5263440
+    CategoryButton.Appearance.TextColorDown = 5263440
+    CategoryButton.Appearance.TextColorHot = 5263440
+    Columns = <
+      item
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+      end>
+    DropDownHeader.Color = clWhite
+    DropDownHeader.ColorTo = clNone
+    DropDownHeader.Font.Charset = DEFAULT_CHARSET
+    DropDownHeader.Font.Color = 5263440
+    DropDownHeader.Font.Height = -11
+    DropDownHeader.Font.Name = 'Tahoma'
+    DropDownHeader.Font.Style = []
+    DropDownHeader.Visible = True
+    DropDownHeader.BorderColor = 13948116
+    DropDownHeader.Buttons = <>
+    DropDownHeight = 0
+    DropDownFooter.Color = clWhite
+    DropDownFooter.ColorTo = clNone
+    DropDownFooter.Font.Charset = DEFAULT_CHARSET
+    DropDownFooter.Font.Color = 5263440
+    DropDownFooter.Font.Height = -11
+    DropDownFooter.Font.Name = 'Tahoma'
+    DropDownFooter.Font.Style = []
+    DropDownFooter.Visible = True
+    DropDownFooter.BorderColor = 13948116
+    DropDownFooter.Buttons = <>
+    DropDownShadow = True
+    DropDownSizable = True
+    DropDownWidth = 0
+    EmptyText = 'Search ...'
+    EmptyTextFocused = False
+    EmptyTextStyle = []
+    FilterCondition.AutoSelect = True
+    FocusFontColor = clBlack
+    ItemHeight = 20
+    Items = <>
+    SearchButton.Appearance.BorderColor = 13948116
+    SearchButton.Appearance.BorderColorHot = 15917525
+    SearchButton.Appearance.BorderColorCheckedHot = 14925219
+    SearchButton.Appearance.BorderColorDown = 14925219
+    SearchButton.Appearance.BorderColorChecked = 15914434
+    SearchButton.Appearance.BorderColorDisabled = 13948116
+    SearchButton.Appearance.ColorTo = clNone
+    SearchButton.Appearance.ColorChecked = 15914434
+    SearchButton.Appearance.ColorCheckedTo = clNone
+    SearchButton.Appearance.ColorDisabled = clWhite
+    SearchButton.Appearance.ColorDisabledTo = clNone
+    SearchButton.Appearance.ColorDown = 14925219
+    SearchButton.Appearance.ColorDownTo = clNone
+    SearchButton.Appearance.ColorHot = 15917525
+    SearchButton.Appearance.ColorHotTo = clNone
+    SearchButton.Appearance.ColorMirror = clWhite
+    SearchButton.Appearance.ColorMirrorTo = clNone
+    SearchButton.Appearance.ColorMirrorHot = 15917525
+    SearchButton.Appearance.ColorMirrorHotTo = clNone
+    SearchButton.Appearance.ColorMirrorDown = 14925219
+    SearchButton.Appearance.ColorMirrorDownTo = clNone
+    SearchButton.Appearance.ColorMirrorChecked = 15914434
+    SearchButton.Appearance.ColorMirrorCheckedTo = clNone
+    SearchButton.Appearance.ColorMirrorDisabled = clWhite
+    SearchButton.Appearance.ColorMirrorDisabledTo = clNone
+    SearchButton.Appearance.GradientHot = ggVertical
+    SearchButton.Appearance.GradientMirrorHot = ggVertical
+    SearchButton.Appearance.GradientDown = ggVertical
+    SearchButton.Appearance.GradientMirrorDown = ggVertical
+    SearchButton.Appearance.GradientChecked = ggVertical
+    SearchButton.Appearance.TextColorChecked = 5263440
+    SearchButton.Appearance.TextColorDown = 5263440
+    SearchButton.Appearance.TextColorHot = 5263440
+    TabOrder = 4
+    Text = ''
+    Version = '1.0.9.2'
+  end
+end

@@ -1,0 +1,41 @@
+unit EditCommentU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TFMEditComment = class(TForm)
+    Edit1: TEdit;
+    Button1: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMEditComment: TFMEditComment;
+
+implementation
+
+{$R *.dfm}
+
+uses ZaselenieU;
+
+procedure TFMEditComment.Button1Click(Sender: TObject);
+begin
+   FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row]:= Edit1.Text;
+   FMEditComment.Close;
+end;
+
+procedure TFMEditComment.FormShow(Sender: TObject);
+begin
+   Edit1.Text:= FMZaselenie.StringGrid1.Cells[FMZaselenie.StringGrid1.Col, FMZaselenie.StringGrid1.Row]
+end;
+
+end.

@@ -1,0 +1,33 @@
+unit DateU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.WinXPickers;
+
+type
+  TFMDate = class(TForm)
+    Button2: TButton;
+    Button1: TButton;
+    DatePicker1: TDatePicker;
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMDate: TFMDate;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFMDate.Button2Click(Sender: TObject);
+begin
+  FMDate.CloseModal;
+end;
+
+end.

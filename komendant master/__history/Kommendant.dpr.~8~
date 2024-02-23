@@ -1,0 +1,22 @@
+program Kommendant;
+
+uses
+  Vcl.Forms,
+  WelcomU in 'WelcomU.pas' {FMWelcom},
+  ZaselenieU in 'ZaselenieU.pas' {FMZaselenie},
+  NewU in 'NewU.pas' {FMNew},
+  DelU in 'DelU.pas' {FMDel},
+  EditCommentU in 'EditCommentU.pas' {FMEditComment};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFMWelcom, FMWelcom);
+  Application.CreateForm(TFMZaselenie, FMZaselenie);
+  Application.CreateForm(TFMNew, FMNew);
+  Application.CreateForm(TFMDel, FMDel);
+  Application.CreateForm(TFMEditComment, FMEditComment);
+  Application.Run;
+end.

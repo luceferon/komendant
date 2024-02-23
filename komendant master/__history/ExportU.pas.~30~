@@ -1,0 +1,297 @@
+unit ExportU;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.CheckLst, ComObj,
+  Vcl.Grids, ShellAPI, ShlObj;
+
+type
+  TFMExport = class(TForm)
+    Button1: TButton;
+    CheckListBox1: TCheckListBox;
+    StringGrid4: TStringGrid;
+    Button2: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure DelStringFromGrid(const Value: string; Grid: TStringGrid);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FMExport: TFMExport;
+
+implementation
+
+{$R *.dfm}
+uses
+  ZaselenieU, WelcomU;
+
+procedure OpenFolderAndSelectFile(const folderPath, fileName: string);
+var
+  folderItem: IShellFolder;
+  folderPidl: PItemIDList;
+  filePidl: PItemIDList;
+  folderPathWide, filePathWide: WideString;
+begin
+  folderPathWide := WideString(folderPath);
+  filePathWide := WideString(folderPath + '\' + fileName);
+
+  if Succeeded(SHGetDesktopFolder(folderItem)) then
+  begin
+    if Succeeded(folderItem.ParseDisplayName(0, nil, PWideChar(folderPathWide), ULONG(nil^), folderPidl, ULONG(nil^))) then
+    begin
+      if Succeeded(folderItem.ParseDisplayName(0, nil, PWideChar(filePathWide), ULONG(nil^), filePidl, ULONG(nil^))) then
+      begin
+        SHOpenFolderAndSelectItems(folderPidl, 1, @filePidl, 0);
+        CoTaskMemFree(filePidl);
+      end;
+      CoTaskMemFree(folderPidl);
+    end;
+  end;
+end;
+
+procedure TFMExport.DelStringFromGrid(const Value: string; Grid: TStringGrid);
+var
+   RowIndex, i, j:integer;
+begin
+// Найти строку с заданным значением в Grid
+  RowIndex := -1;
+  for i := Grid.RowCount - 1 downto 0 do
+  begin
+    if Grid.Cells[2, i] = Value then
+    begin
+      RowIndex := i;
+      Break;
+    end;
+  end;
+
+// Удалить найденную строку из Grid
+  if RowIndex >= 0 then
+  begin
+    Grid.BeginUpdate;
+    try
+      for i := RowIndex to Grid.RowCount - 2 do
+      begin
+        for j := 0 to Grid.ColCount - 1 do
+        begin
+          Grid.Cells[j, i] := Grid.Cells[j, i + 1];
+        end;
+      end;
+      Grid.RowCount := Grid.RowCount - 1;
+    finally
+      Grid.EndUpdate;
+    end;
+  end;
+end;
+
+procedure TFMExport.Button1Click(Sender: TObject);
+const
+  M = 7;
+  N = 10;
+
+  //Константы Excel.
+
+  //Группа констант XlBordersIndex. Задаёт расположение линий.
+  //
+  //Линия по диагонали сверху - вниз.
+  xlDiagonalDown = 5;
+  //Линия по диагонали снизу - вверх.
+  xlDiagonalUp = 6;
+  //Линия, обрамляющая диапазон снизу.
+  xlEdgeBottom = 9;
+  //Линия, обрамляющая диапазон слева.
+  xlEdgeLeft = 7;
+  //Линия, обрамляющая диапазон справа.
+  xlEdgeRight = 10;
+  //Линия, обрамляющая диапазон сверху.
+  xlEdgeTop = 8;
+  //Все горизонтальные линии внутри диапазона.
+  xlInsideHorizontal = 12;
+  //Все вертикальные линии внутри диапазона.
+  xlInsideVertical = 11;
+
+  //Группа констант XlBorderWeight. Задаёт стиль линий.
+  //
+  //(_________) Непрерывная.
+  xlContinuous = 1;
+  //(_ _ _ _ _) В виде последовательности тире.
+  xlDash = -4115;
+  //(_._._._._) В виде тире и точек.
+  xlDashDot = 4;
+  //(_.._.._..) В виде тире и двойных точек.
+  xlDashDotDot = 5;
+  //(.........) В виде точек.
+  xlDot = -4118;
+  //(=========) В виде двойной линии.
+  xlDouble = -4119;
+  //(         ) Отсутствие линии.
+  xlLineStyleNone = -4142;
+  //(/././././) В виде наклонных тире и точек.
+  xlSlantDashDot = 13;
+
+  //Группа констант XlBorderWeight. Задаёт толщину линий.
+  //
+  //Очень тонкая.
+  xlHairline = 1;
+  //Тонкая
+  xlThin = 2;
+  //Средняя.
+  xlMedium = -4138;
+  //Толстая.
+  xlThick = 4;
+var
+  Data1, Data3, Data4, Data: TStringGrid;
+  ChooseColumns: array of Boolean;
+  i, j, k, LastColumn, Column, iRow : Integer;
+  ExcelApp, Sheet, Range: OleVariant;
+  EmptyColumn: Boolean;
+  folderPath, fileName: string;
+begin
+  // Создаем временные переменные для хранения данных
+  Data1 := TStringGrid.Create(nil);
+  Data3 := TStringGrid.Create(nil);
+  Data4 := TStringGrid.Create(nil);
+  try
+    // Копируем содержимое StringGrid1 в Data1
+    Data1.RowCount := FMZaselenie.advStringGrid1.RowCount;
+    Data1.ColCount := FMZaselenie.advStringGrid1.ColCount;
+    for i := 0 to FMZaselenie.advStringGrid1.RowCount - 1 do
+      for j := 0 to FMZaselenie.advStringGrid1.ColCount - 1 do
+        Data1.Cells[j, i] := FMZaselenie.advStringGrid1.Cells[j, i];
+
+    // Копируем содержимое StringGrid3 в Data3
+    Data3.RowCount := FMZaselenie.advStringGrid3.RowCount;
+    Data3.ColCount := FMZaselenie.advStringGrid3.ColCount;
+    for i := 0 to FMZaselenie.advStringGrid3.RowCount - 1 do
+      for j := 0 to FMZaselenie.advStringGrid3.ColCount - 1 do
+        Data3.Cells[j, i] := FMZaselenie.advStringGrid3.Cells[j, i];
+
+    // Определяем новый размер временной переменной Data4
+    Data4.RowCount := Data1.RowCount + Data3.RowCount;
+    Data4.ColCount := Data1.ColCount + Data3.ColCount;
+
+    // Копируем содержимое Data1 в Data4
+    for i := 0 to Data1.RowCount - 1 do
+      for j := 0 to Data1.ColCount - 1 do
+        Data4.Cells[j, i] := Data1.Cells[j, i];
+
+    // Копируем содержимое Data3 в Data4
+    for i := 0 to Data3.RowCount - 1 do
+      for j := 0 to Data3.ColCount - 1 do
+        Data4.Cells[j, i + Data1.RowCount] := Data3.Cells[j, i];
+
+    // Переносим содержимое Data4 в StringGrid4
+    StringGrid4.RowCount := Data4.RowCount;
+    StringGrid4.ColCount := Data4.ColCount;
+    for i := 0 to Data4.RowCount - 1 do
+      for j := 0 to Data4.ColCount - 1 do
+        StringGrid4.Cells[j, i] := Data4.Cells[j, i];
+
+  //Удаляем лишнии записи
+  DelStringFromGrid('ФИО_сотрудника', StringGrid4);
+  DelStringFromGrid('ФИО сотрудника', StringGrid4);
+  DelStringFromGrid('Охрана', StringGrid4);
+  DelStringFromGrid('ИТР Гости', StringGrid4);
+  DelStringFromGrid('ЗПК', StringGrid4);
+  DelStringFromGrid('Служба безопастности', StringGrid4);
+
+  finally
+    // Освобождаем временные переменные
+    Data1.Free;
+    Data3.Free;
+    Data4.Free;
+  end;
+
+    // Создаем экземпляр приложения Excel
+  ExcelApp := CreateOleObject('Excel.Application');
+  ExcelApp.Visible := True;
+
+  // Добавляем новую книгу
+  ExcelApp.Workbooks.Add;
+
+  // Экспортируем содержимое StringGrid1
+  Data := StringGrid4;
+  SetLength(ChooseColumns, Data.ColCount);
+
+  // Получаем выбранные колонки для экспорта из ComboBox1
+  for k := 0 to CheckListBox1.Items.Count - 1 do
+  begin
+    if CheckListBox1.Checked[k] then
+      ChooseColumns[k] := True
+    else
+      ChooseColumns[k] := False;
+  end;
+
+  Sheet := ExcelApp.Workbooks[1].WorkSheets[1];
+  for i := 0 to Data.RowCount - 1 do
+    for j := 2 to Data.ColCount - 1 do
+      if ChooseColumns[j] then
+        Sheet.Cells[i+1, j-1].Value := Data.Cells[j, i];
+
+  // Определение последней заполненной колонки
+  Range := ExcelApp.ActiveSheet.UsedRange;
+  LastColumn := Range.Columns.Count;
+
+  // Перебор всех столбцов в обратном порядке
+  for Column := LastColumn downto 1 do
+  begin
+    EmptyColumn := True;
+    // Перебор всех ячеек в столбце для проверки на наличие значений
+    for iRow := 1 to Range.Rows.Count do
+    begin
+      if not VarIsEmpty(Range.Cells[iRow, Column].Value) then
+      begin
+        EmptyColumn := False;
+        Break;
+      end;
+    end;
+    // Если столбец пустой, то его нужно удалить
+    if EmptyColumn then
+      sheet.Columns[Column].Delete;
+  end;
+
+  //Наводим красоту
+  Range.rows.autofit;
+  Range.Columns.AutoFit;
+  ExcelApp.rows[1].Font.Bold:=true;
+  Range.Borders[xlInsideHorizontal].LineStyle := xlContinuous;
+  Range.Borders[xlInsideHorizontal].Weight := xlThin;
+  Range.Borders[xlInsideVertical].LineStyle := xlContinuous;
+  Range.Borders[xlInsideVertical].Weight := xlThin;
+  //Обрамление диапазона выполняем сплошными толстыми линиями.
+  Range.Borders[xlEdgeTop].LineStyle := xlContinuous;
+  Range.Borders[xlEdgeTop].Weight := xlThick;
+  Range.Borders[xlEdgeBottom].LineStyle := xlContinuous;
+  Range.Borders[xlEdgeBottom].Weight := xlThick;
+  Range.Borders[xlEdgeLeft].LineStyle := xlContinuous;
+  Range.Borders[xlEdgeLeft].Weight := xlThick;
+  Range.Borders[xlEdgeRight].LineStyle := xlContinuous;
+  Range.Borders[xlEdgeRight].Weight := xlThick;
+
+
+    // Сохраняем файл
+  ExcelApp.Workbooks[1].SaveAs('C:\Сотрудники участка '+Uchastok+'.xlsx');
+  ExcelApp.Workbooks[1].Close;
+  ExcelApp.Quit;
+  ShowMessage('Файл сохранен на диске C:\Сотрудники участка '+Uchastok);
+
+  // Укажите путь к папке и имя файла, который нужно выделить
+  folderPath := 'C:\';
+  fileName := 'Сотрудники участка '+Uchastok+'.xlsx';
+
+  OpenFolderAndSelectFile(folderPath, fileName);
+
+  Close;
+end;
+
+procedure TFMExport.Button2Click(Sender: TObject);
+begin
+  close;
+end;
+
+end.
