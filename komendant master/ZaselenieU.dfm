@@ -25,17 +25,13 @@ object FMZaselenie: TFMZaselenie
     Top = 0
     Width = 853
     Height = 488
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     TabOrder = 1
     OnChanging = PageControl1Changing
     object TabSheet1: TTabSheet
       Caption = #1041#1072#1083#1082#1080
       OnShow = TabSheet1Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AdvStringGrid1: TAdvStringGrid
         Left = 0
         Top = 0
@@ -73,6 +69,7 @@ object FMZaselenie: TFMZaselenie
         ActiveCellFont.Style = [fsBold]
         AutoThemeAdapt = True
         Balloon.Enable = True
+        ColumnSize.StretchAll = True
         ControlLook.FixedGradientHoverFrom = clGray
         ControlLook.FixedGradientHoverTo = clWhite
         ControlLook.FixedGradientDownFrom = clGray
@@ -127,7 +124,6 @@ object FMZaselenie: TFMZaselenie
         FixedFont.Quality = fqProof
         Flat = True
         FloatFormat = '%.2f'
-        HoverButtons.Enabled = True
         HoverButtons.Buttons = <
           item
             Caption = #1055#1077#1095#1072#1090#1100' '#1076#1086#1082#1091#1084#1077#1085#1090#1086#1074
@@ -200,11 +196,13 @@ object FMZaselenie: TFMZaselenie
             Width = 35
           end>
         HoverButtons.Column = 2
-        HoverButtons.Position = hbRightFromColumnLeft
+        HoverButtons.MoveActiveRow = False
+        HoverButtons.Position = hbLeftFromColumnLeft
         HoverButtons.Rows = hrAll
         HoverFixedCells = hfFixedColumns
         HTMLSettings.ImageFolder = 'images'
         HTMLSettings.ImageBaseName = 'img'
+        MouseActions.WheelActive = waMouseOver
         Navigation.AdvanceOnEnter = True
         Navigation.AdvanceAutoEdit = False
         PopupToolBarMode = tbNone
@@ -273,10 +271,6 @@ object FMZaselenie: TFMZaselenie
     object TabSheet3: TTabSheet
       Caption = #1054#1073#1097#1072#1075#1072
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AdvStringGrid3: TAdvStringGrid
         Left = 0
         Top = 0
@@ -314,6 +308,7 @@ object FMZaselenie: TFMZaselenie
         ActiveCellFont.Style = [fsBold]
         AutoThemeAdapt = True
         Balloon.Enable = True
+        ColumnSize.StretchAll = True
         ControlLook.FixedGradientHoverFrom = clGray
         ControlLook.FixedGradientHoverTo = clWhite
         ControlLook.FixedGradientDownFrom = clGray
@@ -368,7 +363,6 @@ object FMZaselenie: TFMZaselenie
         FixedFont.Quality = fqProof
         Flat = True
         FloatFormat = '%.2f'
-        HoverButtons.Enabled = True
         HoverButtons.Buttons = <
           item
             Caption = #1055#1077#1095#1072#1090#1100' '#1076#1086#1082#1091#1084#1077#1085#1090#1086#1074
@@ -441,6 +435,7 @@ object FMZaselenie: TFMZaselenie
             Width = 35
           end>
         HoverButtons.Column = 2
+        HoverButtons.MoveActiveRow = False
         HoverButtons.Position = hbRightFromColumnLeft
         HoverButtons.Rows = hrAll
         HoverFixedCells = hfFixedColumns

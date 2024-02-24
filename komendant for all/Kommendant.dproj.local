@@ -3,20 +3,20 @@
 	<Transactions>
     <Transaction>1899.12.30 00:00:00.000.878,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\OrganizationU.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.790,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\DelU.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.756,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.033,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\OtpuskU.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.698,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.396,=C:\Users\xluci\OneDrive\Рабочий стол\Коммендант\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.033,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\OtpuskU.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.206,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.396,=C:\Users\xluci\OneDrive\Рабочий стол\Коммендант\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.756,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.860,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.614,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.315,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.584,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.552,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit2.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.667,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit2.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\ZaselenieU.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.786,C:\Users\xluci\OneDrive\Рабочий стол\Коммендант Для\ZpU.pas=C:\Users\xluci\OneDrive\Рабочий стол\Коммендант Для\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.441,C:\Users\spec-it-sisim\Desktop\Коммендант\NewU.pas=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.790,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.dfm=C:\Users\spec-it-sisim\Desktop\Коммендант\DelU.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.614,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.584,=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.239,C:\Users\spec-it-sisim\Desktop\Коммендант\OtpuskU.dfm=C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.dfm</Transaction>
     <Transaction>1899.12.30 00:00:00.000.878,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.dfm=C:\Users\spec-it-sisim\Desktop\Коммендант\OrganizationU.dfm</Transaction>
     <Transaction>1899.12.30 00:00:00.000.033,C:\Users\spec-it-sisim\Desktop\Коммендант\Unit1.dfm=C:\Users\spec-it-sisim\Desktop\Коммендант\OtpuskU.dfm</Transaction>
