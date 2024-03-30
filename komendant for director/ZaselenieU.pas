@@ -50,6 +50,7 @@ type
       AButton: THoverButtonsCollectionItem);
     procedure AdvStringGrid3HoverButtonClick(Sender: TObject; ARow: Integer;
       AButton: THoverButtonsCollectionItem);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -62,6 +63,8 @@ var
   fio, org, dni, prof, data, otpusknachalo, otpuskkonec, newdate, newstatus,
   Uchastok, FileServ, Kladovchik, SysAdmin, NachUch: string;
   FirstRun:boolean;
+  LockFileHandle: THandle;
+  LockFileName: string;
 
 implementation
 
@@ -661,6 +664,16 @@ begin
    FMZP.Show;
 end;
 
+procedure TFMZaselenie.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if LockFileHandle <> INVALID_HANDLE_VALUE then
+  begin
+    CloseHandle(LockFileHandle);
+    LockFileHandle := INVALID_HANDLE_VALUE;
+    DeleteFile(PChar(LockFileName));
+  end;
+end;
+
 procedure TFMZaselenie.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose:=false;
@@ -700,6 +713,25 @@ end;
 procedure TFMZaselenie.FormShow(Sender: TObject);
 begin
    zaptabl;
+
+   LockFileName := '\\'+FileServ+'\smb_share\komendant\LockFile.lck';
+
+
+  LockFileHandle := CreateFile(PChar(LockFileName), GENERIC_WRITE, 0, nil, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+
+
+  if LockFileHandle = INVALID_HANDLE_VALUE then
+  begin
+    if GetLastError = ERROR_FILE_EXISTS then
+    begin
+      ShowMessage('Программа уже запущенна на другом компьютере.');
+      Application.Terminate;
+      Exit;
+    end
+    else
+      RaiseLastOSError;
+  end;
+
 end;
 
 procedure TFMZaselenie.PageControl1Changing(Sender: TObject;

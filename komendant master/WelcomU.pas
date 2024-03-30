@@ -22,6 +22,7 @@ type
     procedure Button5Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -32,6 +33,8 @@ var
   FMWelcom: TFMWelcom;
   Uchastok, FileServ, Kladovchik, SysAdmin, NachUch: string;
   FirstRun, obchagaTUT:boolean;
+  LockFileHandle: THandle;
+  LockFileName: string;
 
 implementation
 
@@ -63,12 +66,23 @@ end;
 
 procedure TFMWelcom.Button4Click(Sender: TObject);
 begin
-  Application.Terminate;
+  close;
 end;
 
 procedure TFMWelcom.Button5Click(Sender: TObject);
 begin
   FMPereselenie.ShowModal;
+end;
+
+procedure TFMWelcom.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  // Удаляем файл блокировки при закрытии формы
+  if LockFileHandle <> INVALID_HANDLE_VALUE then
+  begin
+    CloseHandle(LockFileHandle); // Закрываем дескриптор файла
+    LockFileHandle := INVALID_HANDLE_VALUE; // Обнуляем дескриптор
+    DeleteFile(PChar(LockFileName)); // Удаляем файл
+  end;
 end;
 
 procedure TFMWelcom.FormCreate(Sender: TObject);
@@ -102,6 +116,32 @@ begin
   begin
      Button3.Enabled:=false;
   end;
+
+  // Путь к файлу блокировки на удаленном компьютере
+  LockFileName := '\\'+FileServ+'\smb_share\komendant\LockFile.lck';
+
+  // Попытка создать или открыть файл блокировки для записи
+  LockFileHandle := CreateFile(PChar(LockFileName), GENERIC_WRITE, 0, nil, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+
+  // Если файл уже существует и заблокирован другой программой
+  if LockFileHandle = INVALID_HANDLE_VALUE then
+  begin
+    if GetLastError = ERROR_FILE_EXISTS then
+    begin
+      ShowMessage('Программа уже запущена на другом компьютере.');
+      Application.Terminate;
+      Exit; // Выходим из процедуры, не запуская программу
+    end
+    else
+      RaiseLastOSError; // Другая ошибка, выбрасываем исключение
+  end;
+
+  // Если мы дошли до этой точки, значит программа не запущена на другом компьютере
+  //ShowMessage('Программа запущена успешно.');
+
+  // Здесь можно запустить основную логику программы
+  // ...
+
 end;
 
 end.

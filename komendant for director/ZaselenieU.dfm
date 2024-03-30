@@ -15,6 +15,7 @@ object FMZaselenie: TFMZaselenie
   OldCreateOrder = True
   Position = poScreenCenter
   WindowState = wsMaximized
+  OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
@@ -32,6 +33,10 @@ object FMZaselenie: TFMZaselenie
     object TabSheet1: TTabSheet
       Caption = #1041#1072#1083#1082#1080
       OnShow = TabSheet1Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object AdvStringGrid1: TAdvStringGrid
         Left = 0
         Top = 0

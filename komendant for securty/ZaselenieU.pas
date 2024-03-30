@@ -233,11 +233,14 @@ end;
 
 procedure TFMZaselenie.FormCreate(Sender: TObject);
 var
-  Ini2: Tinifile;
+  ini, Ini2: Tinifile;
 begin
   chekgrid:=0;
   org:='';
   //Считываем настройки с сервера
+  Ini:=TiniFile.Create(extractfilepath(paramstr(0))+'conf.ini');
+  FileServ:=Ini.ReadString('Uchastok','FileServ','');
+  Ini.Free;
   Ini2:=TiniFile.Create(extractfilepath(paramstr(0))+'conf.ini');
   UniConnection1.Server:=Ini2.ReadString('Connection','Server','localhost');
   UniConnection1.Username:=Ini2.ReadString('Connection','User','root');
@@ -248,7 +251,7 @@ end;
 
 procedure TFMZaselenie.FormShow(Sender: TObject);
 begin
-   zaptabl;
+  zaptabl;
 end;
 
 procedure TFMZaselenie.advStringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;

@@ -265,10 +265,6 @@ object FMZaselenie: TFMZaselenie
     object TabSheet3: TTabSheet
       Caption = #1054#1073#1097#1072#1075#1072
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AdvStringGrid3: TAdvStringGrid
         Left = 0
         Top = 0

@@ -11,6 +11,7 @@ object FMWelcom: TFMWelcom
   Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = True
+  OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
