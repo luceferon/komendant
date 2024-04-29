@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>190</width>
+    <height>230</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>190</width>
+    <height>230</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>190</width>
+    <height>230</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Экспорт сотрудников</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>181</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Выберите данные для экспорта:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="BtnAccept">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="PBAccept">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>190</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QSplitter" name="splitter">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>171</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+   <widget class="QCheckBox" name="CBFIO">
+    <property name="text">
+     <string>ФИО</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="CHKomment">
+    <property name="text">
+     <string>Комментарий</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="CBOtpusk">
+    <property name="text">
+     <string>Дата заездаотпуска</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="CBCompany">
+    <property name="text">
+     <string>Организация</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="CBTel">
+    <property name="text">
+     <string>Телефон</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <connections/>
+</ui>
