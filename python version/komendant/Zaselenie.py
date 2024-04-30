@@ -1,7 +1,10 @@
 import configparser
 import subprocess
 import pymysql
-from PyQt5.QtWidgets import (QApplication, QHeaderView)
+import xlsxwriter
+from xlsxwriter.format import Format
+from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
+                             QMessageBox)
 from PyQt5.uic import loadUiType
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
 from PyQt5.QtCore import Qt
@@ -10,6 +13,25 @@ import os
 
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenie.ui")
 
+class ExportDialog(QDialog):
+    def __init__(self, columns):
+        super().__init__()
+        self.setWindowTitle("Выберите столбцы для экспорта")
+
+        self.layout = QVBoxLayout()
+
+        for i, column in enumerate(columns):
+            checkbox = QCheckBox(column)
+            self.layout.addWidget(checkbox)
+            setattr(self, f"cb_{i}", checkbox)
+
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout.addWidget(self.buttonBox)
+
+        self.setLayout(self.layout)
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -45,33 +67,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                      db=db)
 
         # Получение данных из таблицы balki
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM balki')
-        data = cursor.fetchall()
-        cursor.execute('SELECT * FROM obchaga')
-        data_obchaga = cursor.fetchall()
+        self.cursor = connection.cursor()
+        self.cursor.execute('SELECT * FROM balki')
+        self.data = self.cursor.fetchall()
+        self.cursor.execute('SELECT * FROM obchaga')
+        self.data_obchaga = self.cursor.fetchall()
 
         # Создание модели данных для таблицы
         model = QStandardItemModel()
         model_obchaga = QStandardItemModel()
 
         # Добавление заголовков столбцов и запрет редактирования
-        headers = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
+        self.headers = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
                    'Организация', 'Контактный_телефон', ]
-        for header in headers:
+        for header in self.headers:
             item = QStandardItem(header)
             item.setEditable(False)  # Запрет редактирования ячеек
-            model.setHorizontalHeaderItem(headers.index(header), item)
+            model.setHorizontalHeaderItem(self.headers.index(header), item)
 
-        headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
+        self.headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
                            'Организация', 'Контактный_телефон', ]
-        for header in headers_obchaga:
+        for header in self.headers_obchaga:
             item = QStandardItem(header)
             item.setEditable(False)  # Запрет редактирования ячеек
-            model_obchaga.setHorizontalHeaderItem(headers_obchaga.index(header), item)
+            model_obchaga.setHorizontalHeaderItem(self.headers_obchaga.index(header), item)
 
         # Добавление данных в модель и запрет редактирования ячеек
-        for row_data in data:
+        for row_data in self.data:
             row = []
             for column_data in row_data:
                 item = QStandardItem(str(column_data))
@@ -79,7 +101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 row.append(item)
             model.appendRow(row)
 
-        for row_data in data_obchaga:
+        for row_data in self.data_obchaga:
             row = []
             for column_data in row_data:
                 item = QStandardItem(str(column_data))
@@ -95,12 +117,81 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.TVBalki.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.TVObchaga.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
+        # Подключение слота для кнопки PBExport
+        self.PBExport.clicked.connect(self.export_data)
+
         # Закрытие соединения с базой данных
-        cursor.close()
+        self.cursor.close()
         connection.close()
 
         # Подключение сигнала изменения текста в поле ввода к методу поиска
         self.LESearch.textChanged.connect(self.searchTable)
+
+    def export_data(self):
+        columns = ['Номер', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
+                           'Организация', 'Контактный_телефон', ]
+        # Создание диалогового окна для выбора столбцов
+        export_dialog = ExportDialog(columns)
+        result = export_dialog.exec_()
+
+        if result == QDialog.Accepted:
+            selected_columns = []
+            for i, column in enumerate(columns):
+                if getattr(export_dialog, f"cb_{i}").isChecked():
+                    selected_columns.append(column)
+
+            # Создание файла Excel и экспорт данных
+            workbook = xlsxwriter.Workbook('C:\Комендант\Списки сотрудников.xlsx')
+            worksheet = workbook.add_worksheet()
+
+            bold = workbook.add_format({'bold': True})
+            header_format = workbook.add_format(
+                {'font_name': 'Arial', 'font_size': 12, 'text_wrap': False, 'align': 'center'})
+
+            # Запись заголовков столбцов
+            for col, column in enumerate(selected_columns, start=1):
+                worksheet.write(0, col, column, header_format)
+
+            # Запись данных из таблицы balki
+            row = 1
+            for data_row in self.data:
+                col = 1
+                for column in selected_columns:
+                    col_index = self.headers.index(column)
+                    data = data_row[col_index]
+
+                    # Format cells based on content
+                    if isinstance(data, str) and len(data) > 50:
+                        worksheet.set_column(col, col, 30)
+                    elif isinstance(data, int) or isinstance(data, float):
+                        worksheet.set_column(col, col, 10)
+
+                    worksheet.write(row, col, data_row[col_index])
+                    col += 1
+                row += 1
+
+            # Запись данных из таблицы obchaga
+            for data_row in self.data_obchaga:
+                col = 1
+                for column in selected_columns:
+                    col_index = self.headers_obchaga.index(column)
+
+                    data = data_row[col_index]
+
+                    # Format cells based on content
+                    if isinstance(data, str) and len(data) > 50:
+                        worksheet.set_column(col, col, 30)
+                    elif isinstance(data, int) or isinstance(data, float):
+                        worksheet.set_column(col, col, 10)
+
+                    worksheet.write(row, col, data_row[col_index])
+                    col += 1
+                row += 1
+
+            workbook.close()
+
+            # Вывод сообщения об успешном экспорте
+            QMessageBox.information(self, "Экспорт завершен", "Данные успешно экспортированы в файл 'C:\Комендант\Списки сотрудников.xlsx'.")
 
     def searchTable(self, searchText):
         # Получение текущего индекса выбранной строки

@@ -216,19 +216,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTableView" name="TVTable">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>650</y>
-      <width>41</width>
-      <height>41</height>
-     </rect>
-    </property>
-   </widget>
   </widget>
  </widget>
  <resources/>
