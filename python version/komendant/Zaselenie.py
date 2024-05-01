@@ -2,6 +2,8 @@ import configparser
 import subprocess
 import pymysql
 import xlsxwriter
+import re
+from datetime import datetime
 from xlsxwriter.format import Format
 from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
                              QMessageBox)
@@ -66,7 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                      password=password,
                                      db=db)
 
-        # Получение данных из таблицы balki
+        # Получение данных из таблицы balki и obchaga
         self.cursor = connection.cursor()
         self.cursor.execute('SELECT * FROM balki')
         self.data = self.cursor.fetchall()
@@ -82,14 +84,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                    'Организация', 'Контактный_телефон', ]
         for header in self.headers:
             item = QStandardItem(header)
-            item.setEditable(False)  # Запрет редактирования ячеек
+            item.setEditable(False)
             model.setHorizontalHeaderItem(self.headers.index(header), item)
 
         self.headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
                            'Организация', 'Контактный_телефон', ]
         for header in self.headers_obchaga:
             item = QStandardItem(header)
-            item.setEditable(False)  # Запрет редактирования ячеек
+            item.setEditable(False)
             model_obchaga.setHorizontalHeaderItem(self.headers_obchaga.index(header), item)
 
         # Добавление данных в модель и запрет редактирования ячеек
@@ -97,7 +99,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = []
             for column_data in row_data:
                 item = QStandardItem(str(column_data))
-                item.setEditable(False)  # Запрет редактирования ячеек
+                item.setEditable(False)
                 row.append(item)
             model.appendRow(row)
 
@@ -105,7 +107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = []
             for column_data in row_data:
                 item = QStandardItem(str(column_data))
-                item.setEditable(False)  # Запрет редактирования ячеек
+                item.setEditable(False)
                 row.append(item)
             model_obchaga.appendRow(row)
 
@@ -126,6 +128,55 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Подключение сигнала изменения текста в поле ввода к методу поиска
         self.LESearch.textChanged.connect(self.searchTable)
+
+        def search_and_highlight():
+            search_text = "отпуск"  # Искомое слово
+            today = datetime.now().date()  # Сегодняшняя дата
+            date_regex = r"(\d{2}\.\d{2}\.\d{4}) - (\d{2}\.\d{2}\.\d{4})|(\d{2}\.\d{2}\.\d{4})"
+
+            for row in range(self.TVBalki.model().rowCount()):
+                item = self.TVBalki.model().item(row, 3)  # 4 столбец
+                if item and re.search(search_text, item.text().lower()):
+                    item.setBackground(QColor('blue'))
+                date_item = self.TVBalki.model().item(row, 4)  # 5 столбец
+                if date_item:
+                    match = re.match(date_regex, date_item.text())
+                    if match:
+                        if match.group(3):  # Дата в формате "дд.мм.гггг"
+                            pass  # Ничего не делаем
+                        else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
+                            start_date_str = match.group(1)
+                            end_date_str = match.group(2)
+                            if start_date_str:
+                                start_date = datetime.strptime(start_date_str, '%d.%m.%Y').date()
+                            else:
+                                start_date = None
+                            end_date = datetime.strptime(end_date_str, '%d.%m.%Y').date()
+                            if end_date < today:
+                                date_item.setBackground(QColor('red'))
+
+            for row in range(self.TVObchaga.model().rowCount()):
+                item = self.TVObchaga.model().item(row, 3)  # 4 столбец
+                if item and re.search(search_text, item.text().lower()):
+                    item.setBackground(QColor('blue'))
+                date_item = self.TVObchaga.model().item(row, 4)  # 5 столбец
+                if date_item:
+                    match = re.match(date_regex, date_item.text())
+                    if match:
+                        if match.group(3):  # Дата в формате "дд.мм.гггг"
+                            pass  # Ничего не делаем
+                        else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
+                            start_date_str = match.group(1)
+                            end_date_str = match.group(2)
+                            if start_date_str:
+                                start_date = datetime.strptime(start_date_str, '%d.%m.%Y').date()
+                            else:
+                                start_date = None
+                            end_date = datetime.strptime(end_date_str, '%d.%m.%Y').date()
+                            if end_date < today:
+                                date_item.setBackground(QColor('red'))
+
+        search_and_highlight()
 
     def export_data(self):
         columns = ['Номер', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
@@ -160,7 +211,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     col_index = self.headers.index(column)
                     data = data_row[col_index]
 
-                    # Format cells based on content
                     if isinstance(data, str) and len(data) > 50:
                         worksheet.set_column(col, col, 30)
                     elif isinstance(data, int) or isinstance(data, float):
@@ -178,7 +228,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     data = data_row[col_index]
 
-                    # Format cells based on content
                     if isinstance(data, str) and len(data) > 50:
                         worksheet.set_column(col, col, 30)
                     elif isinstance(data, int) or isinstance(data, float):
