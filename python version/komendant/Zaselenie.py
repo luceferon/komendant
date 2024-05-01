@@ -6,14 +6,35 @@ import re
 from datetime import datetime
 from xlsxwriter.format import Format
 from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
-                             QMessageBox)
+                             QMessageBox, QInputDialog, QCalendarWidget, QPushButton)
 from PyQt5.uic import loadUiType
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 import sys
 import os
 
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenie.ui")
+
+class DateInputDialog(QDialog):
+    def __init__(self, initial_date=None):
+        super().__init__()
+
+        layout = QVBoxLayout()
+
+        self.cal = QCalendarWidget()
+        layout.addWidget(self.cal)
+
+        self.ok_button = QPushButton('OK')
+        self.ok_button.clicked.connect(self.accept)
+        layout.addWidget(self.ok_button)
+
+        self.setLayout(layout)
+
+        if initial_date:
+            self.cal.setSelectedDate(initial_date)
+
+    def dateValue(self):
+        return self.cal.selectedDate()
 
 class ExportDialog(QDialog):
     def __init__(self, columns):
@@ -42,6 +63,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
+
+        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы balki
+        self.TVBalki.doubleClicked.connect(self.edit_date_balki)
+
+        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы obchaga
+        self.TVObchaga.doubleClicked.connect(self.edit_date_obchaga)
 
         # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
@@ -177,6 +204,60 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 date_item.setBackground(QColor('red'))
 
         search_and_highlight()
+
+    def edit_date_balki(self, index):
+        current_date_str = index.model().data(index, Qt.DisplayRole)
+
+        if not current_date_str:
+            return
+
+        dates = current_date_str.split(' - ')  # Проверяем формат "дд.мм.гггг - дд.мм.гггг"
+        if len(dates) == 2:
+            current_date_str = dates[0]
+
+        try:
+            current_date = datetime.strptime(current_date_str, '%d.%m.%Y').date()
+        except ValueError:
+            return
+
+        dialog = DateInputDialog(QDate.fromString(current_date_str, 'dd.MM.yyyy'))
+
+        if dialog.exec_() == QDialog.Accepted:
+            new_date = dialog.dateValue().toString('dd.MM.yyyy')
+
+            if len(dates) == 2:
+                new_date_str = f'{new_date}'
+            else:
+                new_date_str = new_date
+
+            index.model().setData(index, new_date_str, Qt.DisplayRole)
+
+    def edit_date_obchaga(self, index):
+        current_date_str = index.model().data(index, Qt.DisplayRole)
+
+        if not current_date_str:
+            return
+
+        dates = current_date_str.split(' - ')  # Проверяем формат "дд.мм.гггг - дд.мм.гггг"
+        if len(dates) == 2:
+            current_date_str = dates[0]
+
+        try:
+            current_date = datetime.strptime(current_date_str, '%d.%m.%Y').date()
+        except ValueError:
+            return
+
+        dialog = DateInputDialog(QDate.fromString(current_date_str, 'dd.MM.yyyy'))
+
+        if dialog.exec_() == QDialog.Accepted:
+            new_date = dialog.dateValue().toString('dd.MM.yyyy')
+
+            if len(dates) == 2:
+                new_date_str = f'{new_date}'
+            else:
+                new_date_str = new_date
+
+            index.model().setData(index, new_date_str, Qt.DisplayRole)
 
     def export_data(self):
         columns = ['Номер', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
