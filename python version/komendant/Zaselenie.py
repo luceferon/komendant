@@ -124,17 +124,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Добавление данных в модель и запрет редактирования ячеек
         for row_data in self.data:
             row = []
-            for column_data in row_data:
+            for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                item.setEditable(False)
+                if column_index == 3:  # Разрешаем редактирование только для 4 столбца (индекс 3)
+                    item.setEditable(True)
+                else:
+                    item.setEditable(False)
                 row.append(item)
             model.appendRow(row)
 
         for row_data in self.data_obchaga:
             row = []
-            for column_data in row_data:
+            for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                item.setEditable(False)
+                if column_index == 3:  # Разрешаем редактирование только для 4 столбца (индекс 3)
+                    item.setEditable(True)
+                else:
+                    item.setEditable(False)
                 row.append(item)
             model_obchaga.appendRow(row)
 
