@@ -135,18 +135,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             date_regex = r"(\d{2}\.\d{2}\.\d{4}) - (\d{2}\.\d{2}\.\d{4})|(\d{2}\.\d{2}\.\d{4})"
 
             for row in range(self.TVBalki.model().rowCount()):
-                item = self.TVBalki.model().item(row, 3)  # 4 столбец
+                item = self.TVBalki.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
                     item.setBackground(QColor('blue'))
-                date_item = self.TVBalki.model().item(row, 4)  # 5 столбец
+                date_item = self.TVBalki.model().item(row, 4)
                 if date_item:
                     match = re.match(date_regex, date_item.text())
                     if match:
                         if match.group(3):  # Дата в формате "дд.мм.гггг"
                             pass  # Ничего не делаем
                         else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
-                            start_date_str = match.group(1)
-                            end_date_str = match.group(2)
+                            start_date_str = match.group(1) #Начальная дата
+                            end_date_str = match.group(2) #Конечная дата
                             if start_date_str:
                                 start_date = datetime.strptime(start_date_str, '%d.%m.%Y').date()
                             else:
@@ -156,10 +156,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 date_item.setBackground(QColor('red'))
 
             for row in range(self.TVObchaga.model().rowCount()):
-                item = self.TVObchaga.model().item(row, 3)  # 4 столбец
+                item = self.TVObchaga.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
                     item.setBackground(QColor('blue'))
-                date_item = self.TVObchaga.model().item(row, 4)  # 5 столбец
+                date_item = self.TVObchaga.model().item(row, 4)
                 if date_item:
                     match = re.match(date_regex, date_item.text())
                     if match:
