@@ -4,21 +4,22 @@ import pymysql
 import xlsxwriter
 import re
 from datetime import datetime
-from xlsxwriter.format import Format
 from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
-                             QMessageBox, QInputDialog, QCalendarWidget, QPushButton, QLineEdit)
+                             QMessageBox, QCalendarWidget, QPushButton, QLineEdit)
 from PyQt5.uic import loadUiType
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QIntValidator, QRegExpValidator
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QRegExpValidator
 from PyQt5.QtCore import Qt, QDate, QRegExp
 import sys
 import os
 
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenie.ui")
 
-
+# Диалог ввода номера телефона
 class PhoneNumberInputDialog(QDialog):
     def __init__(self, initial_phone=None):
         super().__init__()
+
+        self.setWindowTitle("Телефон")
 
         layout = QVBoxLayout()
 
@@ -50,9 +51,12 @@ class PhoneNumberInputDialog(QDialog):
         else:
             self.ok_button.setEnabled(False)
 
+# Диалог ввода даты
 class DateInputDialog(QDialog):
     def __init__(self, initial_date=None):
         super().__init__()
+
+        self.setWindowTitle("Дата")
 
         layout = QVBoxLayout()
 
@@ -71,6 +75,7 @@ class DateInputDialog(QDialog):
     def dateValue(self):
         return self.cal.selectedDate()
 
+# Диалог экспорта
 class ExportDialog(QDialog):
     def __init__(self, columns):
         super().__init__()
@@ -99,39 +104,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
 
+        # Обработчик двойного щелчка по ячейке в 8 столбце таблицы
         self.TVBalki.doubleClicked.connect(self.phone_double_clicked)
         self.TVObchaga.doubleClicked.connect(self.phone_double_clicked)
 
-        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы balki
+        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы
         self.TVBalki.doubleClicked.connect(self.edit_date_balki)
-
-        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы obchaga
         self.TVObchaga.doubleClicked.connect(self.edit_date_obchaga)
 
         # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
         config.read('conf.ini')
-        server_address = config.get('FileServ', 'server')
+        self.server_address = config.get('FileServ', 'server')
 
         # Получение настроек подключения к базе данных с удаленного сервера
-        remote_file_path = f'\\\\{server_address}\\smb_share\\komendant\\conftest.ini'
-        if os.path.exists(remote_file_path):
+        self.remote_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conftest.ini'
+        if os.path.exists(self.remote_file_path):
             remote_config = configparser.ConfigParser()
-            remote_config.read(remote_file_path)
-            server = remote_config.get('Connection', 'Server')
-            user = remote_config.get('Connection', 'User')
-            password = remote_config.get('Connection', 'Password')
-            db = remote_config.get('Connection', 'BD')
+            remote_config.read(self.remote_file_path)
+            self.server = remote_config.get('Connection', 'Server')
+            self.user = remote_config.get('Connection', 'User')
+            self.password = remote_config.get('Connection', 'Password')
+            self.db = remote_config.get('Connection', 'BD')
         else:
-            print(f"Файл настроек {remote_file_path} не найден.")
+            print(f"Файл настроек {self.remote_file_path} не найден.")
             sys.exit()
 
         # Подключение к базе данных MariaDB
-        connection = pymysql.connect(host=server,
+        connection = pymysql.connect(host=self.server,
                                      port=3306,
-                                     user=user,
-                                     password=password,
-                                     db=db)
+                                     user=self.user,
+                                     password=self.password,
+                                     db=self.db)
 
         # Получение данных из таблицы balki и obchaga
         self.cursor = connection.cursor()
@@ -164,7 +168,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                if column_index == 3:  # Разрешаем редактирование только для 4 столбца (индекс 3)
+                if column_index == 3:  # Разрешаем редактирование только для 4 столбца
                     item.setEditable(True)
                 else:
                     item.setEditable(False)
@@ -175,7 +179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                if column_index == 3:  # Разрешаем редактирование только для 4 столбца (индекс 3)
+                if column_index == 3:  # Разрешаем редактирование только для 4 столбца
                     item.setEditable(True)
                 else:
                     item.setEditable(False)
@@ -229,7 +233,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for row in range(self.TVObchaga.model().rowCount()):
                 item = self.TVObchaga.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
-                    item.setBackground(QColor('blue'))
+                    item.setBackground(QColor('blue'))# Цвет заливки Отпускников
                 date_item = self.TVObchaga.model().item(row, 4)
                 if date_item:
                     match = re.match(date_regex, date_item.text())
@@ -245,18 +249,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 start_date = None
                             end_date = datetime.strptime(end_date_str, '%d.%m.%Y').date()
                             if end_date < today:
-                                date_item.setBackground(QColor('red'))
+                                date_item.setBackground(QColor('red'))# Цвет заливки опаздунов
 
         search_and_highlight()
 
+    # Редактируем телефон
     def phone_double_clicked(self, index):
-        if index.column() == 7:  # проверяем, что клик произошел в 8 столбце
+        if index.column() == 7:
             phone = index.model().data(index, Qt.DisplayRole)
             dialog = PhoneNumberInputDialog(phone)
             if dialog.exec_():
                 new_phone = dialog.phone_input.text()
                 index.model().setData(index, new_phone, Qt.DisplayRole)
 
+    # Редактируем дату
     def edit_date_balki(self, index):
         current_date_str = index.model().data(index, Qt.DisplayRole)
 
@@ -284,6 +290,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             index.model().setData(index, new_date_str, Qt.DisplayRole)
 
+    # Редактируем дату
     def edit_date_obchaga(self, index):
         current_date_str = index.model().data(index, Qt.DisplayRole)
 
@@ -444,11 +451,55 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.TVBalki.model().setData(self.TVBalki.model().index(row, 2), QColor("white"),
                                              Qt.BackgroundRole)
 
+    def save_data_to_db(self):
+        # Подключение к базе данных MariaDB
+        connection = pymysql.connect(host=self.server,
+                                     port=3306,
+                                     user=self.user,
+                                     password=self.password,
+                                     db=self.db)
+        self.cursor = connection.cursor()
+
+        # Удаление всех записей из таблицы balki
+        self.cursor.execute('DELETE FROM balki')
+
+        # Получение данных из таблицы balki
+        model = self.TVBalki.model()
+        rows = model.rowCount()
+        for row in range(rows):
+            data = []
+            for column in range(model.columnCount()):
+                item = model.item(row, column)
+                data.append(item.text())
+            self.cursor.execute('INSERT INTO balki VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', data)
+
+        # Удаление всех записей из таблицы obchaga
+        self.cursor.execute('DELETE FROM obchaga')
+
+        # Получение данных из таблицы obchaga
+        model_obchaga = self.TVObchaga.model()
+        rows_obchaga = model_obchaga.rowCount()
+        for row in range(rows_obchaga):
+            data = []
+            for column in range(model_obchaga.columnCount()):
+                item = model_obchaga.item(row, column)
+                data.append(item.text())
+            self.cursor.execute('INSERT INTO obchaga VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', data)
+
+        # Сохранение изменений в базе данных
+        connection.commit()
+
+        # Закрытие соединения с базой данных
+        self.cursor.close()
+        connection.close()
+
     def closeEvent(self, event):
+
+        self.save_data_to_db()
+
         # Запуск Zaselenie.py
         subprocess.Popen(["python", "mainwindow.py"])
 
-        # Закрытие текущего окна
         self.close()
 
 
