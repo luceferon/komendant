@@ -6,14 +6,49 @@ import re
 from datetime import datetime
 from xlsxwriter.format import Format
 from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
-                             QMessageBox, QInputDialog, QCalendarWidget, QPushButton)
+                             QMessageBox, QInputDialog, QCalendarWidget, QPushButton, QLineEdit)
 from PyQt5.uic import loadUiType
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QIntValidator, QRegExpValidator
+from PyQt5.QtCore import Qt, QDate, QRegExp
 import sys
 import os
 
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenie.ui")
+
+
+class PhoneNumberInputDialog(QDialog):
+    def __init__(self, initial_phone=None):
+        super().__init__()
+
+        layout = QVBoxLayout()
+
+        self.phone_input = QLineEdit()
+        self.phone_input.setPlaceholderText("Введите номер телефона в формате 8(***)***-**-**")
+        self.phone_input.setValidator(QRegExpValidator(QRegExp(r'^(\d{1})[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})$')))
+        self.phone_input.textChanged.connect(self.validate_phone)
+        layout.addWidget(self.phone_input)
+
+        self.ok_button = QPushButton('OK')
+        self.ok_button.clicked.connect(self.accept)
+        layout.addWidget(self.ok_button)
+
+        self.setLayout(layout)
+
+        if initial_phone:
+            self.phone_input.setText(initial_phone)
+
+    def validate_phone(self):
+        text = self.phone_input.text()
+
+        # Remove all non-digit characters
+        phone_digits = ''.join(filter(str.isdigit, text))
+
+        if len(phone_digits) == 11:
+            formatted_phone = '8({}){}-{}-{}'.format(phone_digits[1:4], phone_digits[4:7], phone_digits[7:9], phone_digits[9:11])
+            self.phone_input.setText(formatted_phone)
+            self.ok_button.setEnabled(True)
+        else:
+            self.ok_button.setEnabled(False)
 
 class DateInputDialog(QDialog):
     def __init__(self, initial_date=None):
@@ -63,6 +98,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
+
+        self.TVBalki.doubleClicked.connect(self.phone_double_clicked)
+        self.TVObchaga.doubleClicked.connect(self.phone_double_clicked)
 
         # Обработчик двойного щелчка по ячейке в 5 столбце таблицы balki
         self.TVBalki.doubleClicked.connect(self.edit_date_balki)
@@ -210,6 +248,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 date_item.setBackground(QColor('red'))
 
         search_and_highlight()
+
+    def phone_double_clicked(self, index):
+        if index.column() == 7:  # проверяем, что клик произошел в 8 столбце
+            phone = index.model().data(index, Qt.DisplayRole)
+            dialog = PhoneNumberInputDialog(phone)
+            if dialog.exec_():
+                new_phone = dialog.phone_input.text()
+                index.model().setData(index, new_phone, Qt.DisplayRole)
 
     def edit_date_balki(self, index):
         current_date_str = index.model().data(index, Qt.DisplayRole)
