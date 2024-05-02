@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUiType
 
 # Загрузка интерфейса из файла MainWindow.ui
-Ui_MainWindow, QMainWindow = loadUiType("./MainWindow.ui")
+Ui_MainWindow, QMainWindow = loadUiType("./MainWindowui.ui")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

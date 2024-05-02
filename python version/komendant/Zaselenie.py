@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, QRegExp
 import sys
 import os
 
-Ui_MainWindow, QMainWindow = loadUiType("Zaselenie.ui")
+Ui_MainWindow, QMainWindow = loadUiType("Zaselenieui.ui")
 
 # Диалог ввода номера телефона
 class PhoneNumberInputDialog(QDialog):
