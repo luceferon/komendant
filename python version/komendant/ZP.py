@@ -5,9 +5,9 @@ from datetime import datetime
 import openpyxl
 import pymysql
 import win32com.client
-from PyQt5.QtWidgets import (QApplication, QHeaderView)
+from PyQt5.QtWidgets import (QApplication, QHeaderView, QLabel)
 from PyQt5.uic import loadUiType
-from PyQt5.QtGui import QColor, QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QColor, QStandardItemModel, QStandardItem, QFont
 from PyQt5.QtCore import Qt
 import sys
 import os
@@ -50,6 +50,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Кнопка добавить сотрудника
         self.PBAdd.clicked.connect(self.addNewRow)
 
+
+
         # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
         config.read('conf.ini')
@@ -87,6 +89,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Создание модели данных для таблицы
         self.model_all = QStandardItemModel()
+
+        # Подключение сигнала изменения состояния чекбокса к обновлению количества
+        self.model_all.itemChanged.connect(self.updateCheckedCount)
+
         for row_data in self.data_balki + self.data_obchaga:
             row = []
             self.check_item = QStandardItem()
@@ -230,6 +236,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for row in range(rowCount):
                 self.TVGlav.model().setData(self.TVGlav.model().index(row, 1), QColor("white"),
                                             Qt.BackgroundRole)
+
+    def updateCheckedCount(self, item):
+        if item.column() == 0:  # Проверяем изменение только в первой колонке (check_item)
+            checked_count = 0
+            for row in range(self.model_all.rowCount()):
+                item = self.model_all.item(row, 0)  # Проверяем первую ячейку (check_item)
+                if item is not None and item.checkState() == Qt.Checked:
+                    checked_count += 1
+
+            self.LCount.setText(" {}".format(checked_count))
+
+            if checked_count >= 43:
+                self.LCount.setFont(QFont("Arial", 16, QFont.Bold | QFont.StyleItalic))
+                self.LCount.setStyleSheet("color: red;")
+                self.PBPrint.setEnabled(False)
+            else:
+                self.LCount.setFont(QFont("Arial", 12, QFont.Bold | QFont.StyleItalic))
+                self.LCount.setStyleSheet("color: black;")
+                self.PBPrint.setEnabled(True)
 
     def print_and_save_excel(self):
         # Открытие файла с изменением атрибутов для доступа
