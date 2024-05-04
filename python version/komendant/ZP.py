@@ -50,7 +50,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Кнопка добавить сотрудника
         self.PBAdd.clicked.connect(self.addNewRow)
 
-
+        self.PBUncheck.clicked.connect(self.uncheckAllItems)
 
         # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
@@ -160,6 +160,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QStandardItem("100%")
         ]
         self.model_all.appendRow(new_row)
+
+    def uncheckAllItems(self):
+        for row in range(self.model_all.rowCount()):
+            item = self.model_all.item(row, 0)
+            if item and item.isCheckable():
+                item.setCheckState(Qt.Unchecked)
 
     def transferRowsToTBTemp(self):
         row_count = self.model_TBTemp.rowCount()  # Получаем текущее количество строк в model_TBTemp
@@ -294,9 +300,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Очистка данных в модели TBTemp
         self.model_TBTemp.clear()
     def closeEvent(self, event):
-
-        # Запуск Zaselenie.py
-        subprocess.Popen(["python", "Zaselenie.py"])
 
         self.close()
 

@@ -146,6 +146,22 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPushButton" name="PBUncheck">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>740</y>
+      <width>121</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Сять выделение</string>
+    </property>
+    <property name="autoRepeat">
+     <bool>false</bool>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

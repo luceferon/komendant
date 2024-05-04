@@ -1,6 +1,8 @@
 import configparser
 import subprocess
+import openpyxl
 import pymysql
+import win32com.client
 import xlsxwriter
 import re
 from datetime import datetime
@@ -12,7 +14,30 @@ from PyQt5.QtCore import Qt, QDate, QRegExp
 import sys
 import os
 
+from openpyxl.reader.excel import load_workbook
+
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenieui.ui")
+Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
+
+class ExcelPrinter:
+    def __init__(self, server_address, smb_share):
+        # Получение адреса сервера из файла настроек
+        config = configparser.ConfigParser()
+        config.read('conf.ini')
+        self.server_address = config.get('FileServ', 'server')
+        self.smb_share = '\\smb_share\\komendant\\'
+
+    def print_excel_file(self, file_path):
+
+        workbook = load_workbook(file_path)
+        worksheet = workbook.active or workbook['Sheet1']
+
+        excel = win32com.client.Dispatch("Excel.Application")
+        excel.Visible = False
+        workbook = excel.Workbooks.Open(file_path)
+        workbook.PrintOut()
+        workbook.Close()
+        excel.Quit()
 
 # Диалог ввода номера телефона
 class PhoneNumberInputDialog(QDialog):
@@ -99,10 +124,18 @@ class ExportDialog(QDialog):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.Company = None
+        self.Dolznost = None
+        self.FIO = None
+        self.smb_share = '\\smb_share\\komendant\\'
         self.setupUi(self)
 
         # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
+
+        self.PBZP.clicked.connect(self.zpwindow)
+
+        self.PBOtpusk.clicked.connect(self.otpusk_dialog)
 
         # Обработчик двойного щелчка по ячейке в 8 столбце таблицы
         self.TVBalki.doubleClicked.connect(self.phone_double_clicked)
@@ -493,12 +526,295 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cursor.close()
         connection.close()
 
+    def zpwindow(self, event):
+
+        self.save_data_to_db()
+
+        subprocess.Popen(["python", "ZP.py"])
+
+    def otpusk_dialog(self):
+        dialog = QDialog()
+        ui = Ui_Dialog()
+        ui.setupUi(dialog)
+
+        # прячем т.к. увольняем
+        def handle_uval_state_changed(state):
+            if state:
+                ui.DENachalo.hide()
+                ui.DEKonec.hide()
+                ui.CBObhod.hide()
+                ui.CBDengi.hide()
+                ui.DBOtpusk.hide()
+                ui.label_2.hide()
+                ui.label_3.hide()
+                ui.label_4.hide()
+            else:
+                ui.DENachalo.show()
+                ui.DEKonec.show()
+                ui.CBObhod.show()
+                ui.CBDengi.show()
+                ui.DBOtpusk.show()
+                ui.label_2.show()
+                ui.label_3.show()
+                ui.label_4.show()
+
+        ui.CBUval.stateChanged.connect(handle_uval_state_changed)
+
+        selected_index = None
+        if self.tabWidget.currentIndex() == 0:  # вкладка tabBalki
+            selected_index = self.TVBalki.selectedIndexes()[0]
+        elif self.tabWidget.currentIndex() == 1:  # вкладка tabObchaga
+            selected_index = self.TVObchaga.selectedIndexes()[0]
+
+        if selected_index is not None:
+            if selected_index.column() == 2:  # проверка что выбрана ячейка в столбце ФИО
+                self.FIO = selected_index.data()
+                self.Dolznost = selected_index.sibling(selected_index.row(), 5).data()
+                self.Company = selected_index.sibling(selected_index.row(), 6).data()
+
+                # Отладочная информация не забыть потом удалить сами лабелы
+                ui.label_5.setText(self.FIO)
+                ui.label_6.setText(self.Dolznost)
+                ui.label_7.setText(self.Company)
+                # конец отладки
+
+                def handle_button_click():
+                    self.Dni = ui.SBDni.value()
+                    self.Uval = ui.CBUval.isChecked()
+                    self.Nachalo = ui.DENachalo.date()
+                    self.Konec = ui.DEKonec.date()
+                    self.Obhod = ui.CBObhod.isChecked()
+                    self.Dengi = ui.CBDengi.isChecked()
+                    self.Otpusk = ui.DBOtpusk.isChecked()
+
+                    #Отладочная информация
+                    QMessageBox.information(self, "Values",
+                                            f"Dni: {self.Dni}\n"
+                                            f"Uval: {self.Uval}\n"
+                                            f"Nachalo: {self.Nachalo.toString('dd.MM.yyyy')}\n"
+                                            f"Konec: {self.Konec.toString('dd.MM.yyyy')}\n"
+                                            f"Obhod: {self.Obhod}\n"
+                                            f"Otpusk: {self.Otpusk}"
+                                            )
+                    #конец отладки
+                    # печатаем заявление на деньги
+                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Dengi:  # по нажатию ОК проверяем стоит ли галка на CBDengi
+                        zpotpusk_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'zpotpusk.xlsx')
+                        self.print_doc_zpotpusk(zpotpusk_doc)
+
+                    # печатаем заявление на обходной
+                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Obhod:  # по нажатию ОК проверяем стоит ли галка на CBObhod
+                        obhod_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'obhod.xlsx')
+                        self.print_doc_zpotpusk(obhod_doc)
+
+                    # печатаем заявление на отпуск
+                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Otpusk:  # по нажатию ОК проверяем стоит ли галка на CBOtpusk
+                        otpusk_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'otpusk.xlsx')
+                        self.print_doc_zpotpusk(otpusk_doc)
+
+                    # печатаем заявление на увал
+                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Uval:  # по нажатию ОК проверяем стоит ли галка на CBUval
+                        uval_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'uval.xlsx')
+                        self.print_doc_zpotpusk(uval_doc)
+
+                ui.buttonBox.accepted.connect(handle_button_click)
+                dialog.exec_()
+            else:
+                QMessageBox.warning(self, "Warning", "Необходимо выбрать сотрудника", QMessageBox.Ok)
+        else:
+            QMessageBox.warning(self, "Warning", "Необходимо выбрать сотрудника", QMessageBox.Ok)
+
+        return self.FIO, self.Dolznost, self.Company
+
+    def print_doc_zpotpusk(self, file_path):
+        # Открытие файла с изменением атрибутов для доступа
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook.active
+
+        # Формирование статичных данных
+        sheet['A5'] = f"От {self.Dolznost}"
+        sheet['A6'] = self.FIO
+
+        # Проверка условия для Company
+        if self.Company == 'ООО "А-Сервис"':
+            sheet['A3'] = 'ООО "А-Сервис"'
+            sheet['A4'] = "Белову В. Ю."
+
+        if self.Company == 'ООО "Еда"':
+            sheet['A3'] = 'ООО "Еда"'
+            sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Комплектсервис"':
+            sheet['A3'] = 'ООО "Комплектсервис"'
+            sheet['A4'] = "Потриденный В. Ф."
+
+        if self.Company == 'ООО "МоторСервис"':
+            sheet['A3'] = 'ООО "МоторСервис"'
+            sheet['A4'] = "Борисюк К. М."
+
+        if self.Company == 'ООО "Сисим"':
+            sheet['A3'] = 'ООО "Сисим"'
+            sheet['A4'] = "Ковалькову М. Н."
+
+        if self.Company == 'ООО "СпецПодряд"':
+            sheet['A3'] = 'ООО "СпецПодряд"'
+            sheet['A4'] = "Осс А. В."
+
+        if self.Company == 'ООО "КрасИнтегра"':
+            sheet['A3'] = 'ООО "КрасИнтегра"'
+            sheet['A4'] = "Сапину В. Д."
+
+        # Сохранение файла
+        workbook.save(file_path)
+
+        # Печать файла
+        printer = ExcelPrinter(self.server_address, self.smb_share)
+        printer.print_excel_file(file_path)
+
+    # надо редактировать
+    def print_doc_otpusk(self, file_path):
+        # Открытие файла с изменением атрибутов для доступа
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook.active
+
+        # Формирование статичных данных
+        sheet['A5'] = f"От {self.Dolznost}"
+        sheet['A6'] = self.FIO
+
+        # Проверка условия для Company
+        if self.Company == 'ООО "А-Сервис"':
+            sheet['A3'] = 'ООО "А-Сервис"'
+            sheet['A4'] = "Белову В. Ю."
+
+        if self.Company == 'ООО "Еда"':
+            sheet['A3'] = 'ООО "Еда"'
+            sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Комплектсервис"':
+            sheet['A3'] = 'ООО "Комплектсервис"'
+            sheet['A4'] = "Потриденный В. Ф."
+
+        if self.Company == 'ООО "МоторСервис"':
+            sheet['A3'] = 'ООО "МоторСервис"'
+            sheet['A4'] = "Борисюк К. М."
+
+        if self.Company == 'ООО "Сисим"':
+            sheet['A3'] = 'ООО "Сисим"'
+            sheet['A4'] = "Ковалькову М. Н."
+
+        if self.Company == 'ООО "СпецПодряд"':
+            sheet['A3'] = 'ООО "СпецПодряд"'
+            sheet['A4'] = "Осс А. В."
+
+        if self.Company == 'ООО "КрасИнтегра"':
+            sheet['A3'] = 'ООО "КрасИнтегра"'
+            sheet['A4'] = "Сапину В. Д."
+
+        # Сохранение файла
+        workbook.save(file_path)
+
+        # Печать файла
+        printer = ExcelPrinter(self.server_address, self.smb_share)
+        printer.print_excel_file(file_path)
+
+    # надо редактировать
+    def print_doc_obhod(self, file_path):
+        # Открытие файла с изменением атрибутов для доступа
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook.active
+
+        # Формирование статичных данных
+        sheet['A5'] = f"От {self.Dolznost}"
+        sheet['A6'] = self.FIO
+
+        # Проверка условия для Company
+        if self.Company == 'ООО "А-Сервис"':
+            sheet['A3'] = 'ООО "А-Сервис"'
+            sheet['A4'] = "Белову В. Ю."
+
+        if self.Company == 'ООО "Еда"':
+            sheet['A3'] = 'ООО "Еда"'
+            sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Комплектсервис"':
+            sheet['A3'] = 'ООО "Комплектсервис"'
+            sheet['A4'] = "Потриденный В. Ф."
+
+        if self.Company == 'ООО "МоторСервис"':
+            sheet['A3'] = 'ООО "МоторСервис"'
+            sheet['A4'] = "Борисюк К. М."
+
+        if self.Company == 'ООО "Сисим"':
+            sheet['A3'] = 'ООО "Сисим"'
+            sheet['A4'] = "Ковалькову М. Н."
+
+        if self.Company == 'ООО "СпецПодряд"':
+            sheet['A3'] = 'ООО "СпецПодряд"'
+            sheet['A4'] = "Осс А. В."
+
+        if self.Company == 'ООО "КрасИнтегра"':
+            sheet['A3'] = 'ООО "КрасИнтегра"'
+            sheet['A4'] = "Сапину В. Д."
+
+        # Сохранение файла
+        workbook.save(file_path)
+
+        # Печать файла
+        printer = ExcelPrinter(self.server_address, self.smb_share)
+        printer.print_excel_file(file_path)
+
+    # надо редактировать
+    def print_doc_uval(self, file_path):
+        # Открытие файла с изменением атрибутов для доступа
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook.active
+
+        # Формирование статичных данных
+        sheet['A5'] = f"От {self.Dolznost}"
+        sheet['A6'] = self.FIO
+
+        # Проверка условия для Company
+        if self.Company == 'ООО "А-Сервис"':
+            sheet['A3'] = 'ООО "А-Сервис"'
+            sheet['A4'] = "Белову В. Ю."
+
+        if self.Company == 'ООО "Еда"':
+            sheet['A3'] = 'ООО "Еда"'
+            sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Комплектсервис"':
+            sheet['A3'] = 'ООО "Комплектсервис"'
+            sheet['A4'] = "Потриденный В. Ф."
+
+        if self.Company == 'ООО "МоторСервис"':
+            sheet['A3'] = 'ООО "МоторСервис"'
+            sheet['A4'] = "Борисюк К. М."
+
+        if self.Company == 'ООО "Сисим"':
+            sheet['A3'] = 'ООО "Сисим"'
+            sheet['A4'] = "Ковалькову М. Н."
+
+        if self.Company == 'ООО "СпецПодряд"':
+            sheet['A3'] = 'ООО "СпецПодряд"'
+            sheet['A4'] = "Осс А. В."
+
+        if self.Company == 'ООО "КрасИнтегра"':
+            sheet['A3'] = 'ООО "КрасИнтегра"'
+            sheet['A4'] = "Сапину В. Д."
+
+        # Сохранение файла
+        workbook.save(file_path)
+
+        # Печать файла
+        printer = ExcelPrinter(self.server_address, self.smb_share)
+        printer.print_excel_file(file_path)
+
     def closeEvent(self, event):
 
         self.save_data_to_db()
 
         # Запуск Zaselenie.py
-        subprocess.Popen(["python", "mainwindow.py"])
+        #subprocess.Popen(["python", "mainwindow.py"])
 
         self.close()
 
