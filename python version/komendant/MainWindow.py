@@ -1,9 +1,8 @@
 import sys
 import subprocess
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication
 from PyQt5.uic import loadUiType
 
-# Загрузка интерфейса из файла MainWindow.ui
 Ui_MainWindow, QMainWindow = loadUiType("./MainWindowui.ui")
 
 
@@ -12,17 +11,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # Подключение слота для кнопки BExit
         self.BExit.clicked.connect(self.close)
 
-        # Подключение слота для кнопки BSpisok
         self.BSpisok.clicked.connect(self.start_zaselenie)
 
+        self.BZaselenie.clicked.connect(self.start_add)
+
     def start_zaselenie(self):
-        # Запуск Zaselenie.py
         subprocess.Popen(["python", "Zaselenie.py"])
 
-        # Закрытие текущего окна MainWindow
+        self.close()
+
+    def start_add(self):
+        subprocess.Popen(["python", "Add.py"])
+
         self.close()
 
 

@@ -210,7 +210,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             model_obchaga.setHorizontalHeaderItem(self.headers_obchaga.index(header), item)
 
         # Добавление данных в модель и запрет редактирования ячеек
-        for row_data in self.data:
+        def custom_sort_key(x):
+            value = x[0]
+            try:
+                return (int(value), "")
+            except ValueError:
+                return (
+                float("inf"), value)
+
+        sorted_data = sorted(self.data, key=lambda x: custom_sort_key(x))  # Сортировка данных
+        for row_data in sorted_data:
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
@@ -221,7 +230,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 row.append(item)
             model.appendRow(row)
 
-        for row_data in self.data_obchaga:
+        sorted_data_obchaga = sorted(self.data_obchaga, key=lambda x: custom_sort_key(x))  # Сортировка данных
+        for row_data in sorted_data_obchaga:
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
@@ -816,7 +826,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.save_data_to_db()
 
         # Запуск Zaselenie.py
-        #subprocess.Popen(["python", "mainwindow.py"])
+        subprocess.Popen(["python", "mainwindow.py"])
 
         self.close()
 
