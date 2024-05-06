@@ -5,7 +5,7 @@ import pymysql
 import win32com.client
 import xlsxwriter
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from PyQt5.QtWidgets import (QApplication, QHeaderView, QCheckBox, QDialog, QVBoxLayout, QDialogButtonBox,
                              QMessageBox, QCalendarWidget, QPushButton, QLineEdit)
 from PyQt5.uic import loadUiType
@@ -19,6 +19,7 @@ from openpyxl.reader.excel import load_workbook
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenieui.ui")
 Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
 
+
 class ExcelPrinter:
     def __init__(self, server_address, smb_share):
         # Получение адреса сервера из файла настроек
@@ -28,7 +29,6 @@ class ExcelPrinter:
         self.smb_share = '\\smb_share\\komendant\\'
 
     def print_excel_file(self, file_path):
-
         workbook = load_workbook(file_path)
         worksheet = workbook.active or workbook['Sheet1']
 
@@ -38,6 +38,7 @@ class ExcelPrinter:
         workbook.PrintOut()
         workbook.Close()
         excel.Quit()
+
 
 # Диалог ввода номера телефона
 class PhoneNumberInputDialog(QDialog):
@@ -50,7 +51,8 @@ class PhoneNumberInputDialog(QDialog):
 
         self.phone_input = QLineEdit()
         self.phone_input.setPlaceholderText("Введите номер телефона в формате 8(***)***-**-**")
-        self.phone_input.setValidator(QRegExpValidator(QRegExp(r'^(\d{1})[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})$')))
+        self.phone_input.setValidator(
+            QRegExpValidator(QRegExp(r'^(\d{1})[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})$')))
         self.phone_input.textChanged.connect(self.validate_phone)
         layout.addWidget(self.phone_input)
 
@@ -70,11 +72,13 @@ class PhoneNumberInputDialog(QDialog):
         phone_digits = ''.join(filter(str.isdigit, text))
 
         if len(phone_digits) == 11:
-            formatted_phone = '8({}){}-{}-{}'.format(phone_digits[1:4], phone_digits[4:7], phone_digits[7:9], phone_digits[9:11])
+            formatted_phone = '8({}){}-{}-{}'.format(phone_digits[1:4], phone_digits[4:7], phone_digits[7:9],
+                                                     phone_digits[9:11])
             self.phone_input.setText(formatted_phone)
             self.ok_button.setEnabled(True)
         else:
             self.ok_button.setEnabled(False)
+
 
 # Диалог ввода даты
 class DateInputDialog(QDialog):
@@ -100,6 +104,7 @@ class DateInputDialog(QDialog):
     def dateValue(self):
         return self.cal.selectedDate()
 
+
 # Диалог экспорта
 class ExportDialog(QDialog):
     def __init__(self, columns):
@@ -121,6 +126,7 @@ class ExportDialog(QDialog):
 
         self.setLayout(self.layout)
 
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -129,6 +135,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.FIO = None
         self.smb_share = '\\smb_share\\komendant\\'
         self.setupUi(self)
+        self.state_obhod = 'Отпуск'
 
         # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
@@ -159,6 +166,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.user = remote_config.get('Connection', 'User')
             self.password = remote_config.get('Connection', 'Password')
             self.db = remote_config.get('Connection', 'BD')
+            self.NachUch = remote_config.get('Uchastok', 'NachUch')
+            self.Uchastok = remote_config.get('Uchastok', 'Uchastok')
+            self.Kladovchik = remote_config.get('Uchastok', 'Kladovchik')
+            self.SysAdmin = remote_config.get('Uchastok', 'SysAdmin')
+
         else:
             print(f"Файл настроек {self.remote_file_path} не найден.")
             sys.exit()
@@ -183,14 +195,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Добавление заголовков столбцов и запрет редактирования
         self.headers = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
-                   'Организация', 'Контактный_телефон', ]
+                        'Организация', 'Контактный_телефон', ]
         for header in self.headers:
             item = QStandardItem(header)
             item.setEditable(False)
             model.setHorizontalHeaderItem(self.headers.index(header), item)
 
-        self.headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
-                           'Организация', 'Контактный_телефон', ]
+        self.headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска',
+                                'Должность',
+                                'Организация', 'Контактный_телефон', ]
         for header in self.headers_obchaga:
             item = QStandardItem(header)
             item.setEditable(False)
@@ -253,8 +266,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         if match.group(3):  # Дата в формате "дд.мм.гггг"
                             pass  # Ничего не делаем
                         else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
-                            start_date_str = match.group(1) #Начальная дата
-                            end_date_str = match.group(2) #Конечная дата
+                            start_date_str = match.group(1)  # Начальная дата
+                            end_date_str = match.group(2)  # Конечная дата
                             if start_date_str:
                                 start_date = datetime.strptime(start_date_str, '%d.%m.%Y').date()
                             else:
@@ -266,7 +279,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for row in range(self.TVObchaga.model().rowCount()):
                 item = self.TVObchaga.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
-                    item.setBackground(QColor('blue'))# Цвет заливки Отпускников
+                    item.setBackground(QColor('blue'))  # Цвет заливки Отпускников
                 date_item = self.TVObchaga.model().item(row, 4)
                 if date_item:
                     match = re.match(date_regex, date_item.text())
@@ -282,7 +295,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 start_date = None
                             end_date = datetime.strptime(end_date_str, '%d.%m.%Y').date()
                             if end_date < today:
-                                date_item.setBackground(QColor('red'))# Цвет заливки опаздунов
+                                date_item.setBackground(QColor('red'))  # Цвет заливки опаздунов
 
         search_and_highlight()
 
@@ -353,7 +366,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def export_data(self):
         columns = ['Номер', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
-                           'Организация', 'Контактный_телефон', ]
+                   'Организация', 'Контактный_телефон', ]
         # Создание диалогового окна для выбора столбцов
         export_dialog = ExportDialog(columns)
         result = export_dialog.exec_()
@@ -413,7 +426,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             workbook.close()
 
             # Вывод сообщения об успешном экспорте
-            QMessageBox.information(self, "Экспорт завершен", "Данные успешно экспортированы в файл 'C:\Комендант\Списки сотрудников.xlsx'.")
+            QMessageBox.information(self, "Экспорт завершен",
+                                    "Данные успешно экспортированы в файл 'C:\Комендант\Списки сотрудников.xlsx'.")
 
     def searchTable(self, searchText):
         # Получение текущего индекса выбранной строки
@@ -537,6 +551,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ui = Ui_Dialog()
         ui.setupUi(dialog)
 
+        # Установка значений по умолчанию для DENachalo и DEKonec
+        current_date = datetime.now().date()
+        ui.DENachalo.setDate(current_date)
+        ui.DEKonec.setDate(current_date + timedelta(days=30))  # Добавляем месяц (30 дней)
+
         # прячем т.к. увольняем
         def handle_uval_state_changed(state):
             if state:
@@ -548,6 +567,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ui.label_2.hide()
                 ui.label_3.hide()
                 ui.label_4.hide()
+                self.state_obhod = 'Увольнение'
             else:
                 ui.DENachalo.show()
                 ui.DEKonec.show()
@@ -557,6 +577,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ui.label_2.show()
                 ui.label_3.show()
                 ui.label_4.show()
+                self.state_obhod = 'Отпуск'
 
         ui.CBUval.stateChanged.connect(handle_uval_state_changed)
 
@@ -571,13 +592,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.FIO = selected_index.data()
                 self.Dolznost = selected_index.sibling(selected_index.row(), 5).data()
                 self.Company = selected_index.sibling(selected_index.row(), 6).data()
-
-                # Отладочная информация не забыть потом удалить сами лабелы
-                ui.label_5.setText(self.FIO)
-                ui.label_6.setText(self.Dolznost)
-                ui.label_7.setText(self.Company)
-                # конец отладки
-
                 def handle_button_click():
                     self.Dni = ui.SBDni.value()
                     self.Uval = ui.CBUval.isChecked()
@@ -587,35 +601,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.Dengi = ui.CBDengi.isChecked()
                     self.Otpusk = ui.DBOtpusk.isChecked()
 
-                    #Отладочная информация
-                    QMessageBox.information(self, "Values",
-                                            f"Dni: {self.Dni}\n"
-                                            f"Uval: {self.Uval}\n"
-                                            f"Nachalo: {self.Nachalo.toString('dd.MM.yyyy')}\n"
-                                            f"Konec: {self.Konec.toString('dd.MM.yyyy')}\n"
-                                            f"Obhod: {self.Obhod}\n"
-                                            f"Otpusk: {self.Otpusk}"
-                                            )
-                    #конец отладки
+                    model = selected_index.model()
+                    model.setData(model.index(selected_index.row(), 3), "Отпуск")
+                    model.setData(model.index(selected_index.row(), 4),
+                                  f"{self.Nachalo.toString('dd.MM.yyyy')} - {self.Konec.toString('dd.MM.yyyy')}")
+
                     # печатаем заявление на деньги
-                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Dengi:  # по нажатию ОК проверяем стоит ли галка на CBDengi
+                    if ui.buttonBox.accepted.connect(
+                            handle_button_click) and self.Dengi:  # по нажатию ОК проверяем стоит ли галка на CBDengi
                         zpotpusk_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'zpotpusk.xlsx')
                         self.print_doc_zpotpusk(zpotpusk_doc)
 
                     # печатаем заявление на обходной
-                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Obhod:  # по нажатию ОК проверяем стоит ли галка на CBObhod
+                    if ui.buttonBox.accepted.connect(
+                            handle_button_click) and self.Obhod:  # по нажатию ОК проверяем стоит ли галка на CBObhod
                         obhod_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'obhod.xlsx')
-                        self.print_doc_zpotpusk(obhod_doc)
+                        self.print_doc_obhod(obhod_doc)
 
                     # печатаем заявление на отпуск
-                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Otpusk:  # по нажатию ОК проверяем стоит ли галка на CBOtpusk
+                    if ui.buttonBox.accepted.connect(
+                            handle_button_click) and self.Otpusk:  # по нажатию ОК проверяем стоит ли галка на CBOtpusk
                         otpusk_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'otpusk.xlsx')
-                        self.print_doc_zpotpusk(otpusk_doc)
+                        self.print_doc_otpusk(otpusk_doc)
 
                     # печатаем заявление на увал
-                    if ui.buttonBox.accepted.connect(handle_button_click) and self.Uval:  # по нажатию ОК проверяем стоит ли галка на CBUval
+                    if ui.buttonBox.accepted.connect(
+                            handle_button_click) and self.Uval:  # по нажатию ОК проверяем стоит ли галка на CBUval
                         uval_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'uval.xlsx')
-                        self.print_doc_zpotpusk(uval_doc)
+                        self.print_doc_uval(uval_doc)
+                        obhod_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'obhod.xlsx')
+                        self.print_doc_obhod(obhod_doc)
 
                 ui.buttonBox.accepted.connect(handle_button_click)
                 dialog.exec_()
@@ -671,7 +686,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer = ExcelPrinter(self.server_address, self.smb_share)
         printer.print_excel_file(file_path)
 
-    # надо редактировать
     def print_doc_otpusk(self, file_path):
         # Открытие файла с изменением атрибутов для доступа
         workbook = openpyxl.load_workbook(file_path)
@@ -680,6 +694,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Формирование статичных данных
         sheet['A5'] = f"От {self.Dolznost}"
         sheet['A6'] = self.FIO
+        sheet['A15'] = f"С {self.Nachalo.toString('dd.MM.yyyy')}"
+        sheet['D15'] = f"По  {self.Konec.toString('dd.MM.yyyy')}"
 
         # Проверка условия для Company
         if self.Company == 'ООО "А-Сервис"':
@@ -717,44 +733,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer = ExcelPrinter(self.server_address, self.smb_share)
         printer.print_excel_file(file_path)
 
-    # надо редактировать
     def print_doc_obhod(self, file_path):
+
+        current_date = datetime.now().date()
+        print_data = current_date.strftime('%d.%m.%Y')
+
         # Открытие файла с изменением атрибутов для доступа
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
 
         # Формирование статичных данных
-        sheet['A5'] = f"От {self.Dolznost}"
-        sheet['A6'] = self.FIO
-
-        # Проверка условия для Company
-        if self.Company == 'ООО "А-Сервис"':
-            sheet['A3'] = 'ООО "А-Сервис"'
-            sheet['A4'] = "Белову В. Ю."
-
-        if self.Company == 'ООО "Еда"':
-            sheet['A3'] = 'ООО "Еда"'
-            sheet['A4'] = "Потапову М. Г."
-
-        if self.Company == 'ООО "Комплектсервис"':
-            sheet['A3'] = 'ООО "Комплектсервис"'
-            sheet['A4'] = "Потриденный В. Ф."
-
-        if self.Company == 'ООО "МоторСервис"':
-            sheet['A3'] = 'ООО "МоторСервис"'
-            sheet['A4'] = "Борисюк К. М."
-
-        if self.Company == 'ООО "Сисим"':
-            sheet['A3'] = 'ООО "Сисим"'
-            sheet['A4'] = "Ковалькову М. Н."
-
-        if self.Company == 'ООО "СпецПодряд"':
-            sheet['A3'] = 'ООО "СпецПодряд"'
-            sheet['A4'] = "Осс А. В."
-
-        if self.Company == 'ООО "КрасИнтегра"':
-            sheet['A3'] = 'ООО "КрасИнтегра"'
-            sheet['A4'] = "Сапину В. Д."
+        sheet['E5'] = self.Dolznost
+        sheet['E6'] = self.FIO
+        sheet['B3'] = self.Uchastok
+        sheet['J3'] = f"Дата {print_data} г."
+        sheet['C6'] = self.state_obhod
+        sheet['D12'] = self.Kladovchik
+        sheet['D23'] = self.Kladovchik
+        sheet['D33'] = self.SysAdmin
+        sheet['D41'] = self.NachUch
+        sheet['G36'] = f"{self.Dni} - дней"
 
         # Сохранение файла
         workbook.save(file_path)
@@ -763,8 +761,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer = ExcelPrinter(self.server_address, self.smb_share)
         printer.print_excel_file(file_path)
 
-    # надо редактировать
     def print_doc_uval(self, file_path):
+
+        current_date = datetime.now().date()
+        print_data = current_date.strftime('%d.%m.%Y')
+
         # Открытие файла с изменением атрибутов для доступа
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
@@ -772,6 +773,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Формирование статичных данных
         sheet['A5'] = f"От {self.Dolznost}"
         sheet['A6'] = self.FIO
+        sheet['A15'] = f"С {print_data}"
 
         # Проверка условия для Company
         if self.Company == 'ООО "А-Сервис"':
