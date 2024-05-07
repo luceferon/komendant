@@ -17,6 +17,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.BZaselenie.clicked.connect(self.start_add)
 
+        self.BViselit.clicked.connect(self.start_del)
+
+        self.BPereseli.clicked.connect(self.start_relocate())
+
     def start_zaselenie(self):
         subprocess.Popen(["python", "Zaselenie.py"])
 
@@ -24,6 +28,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def start_add(self):
         subprocess.Popen(["python", "Add.py"])
+
+        self.close()
+
+    def start_del(self):
+        subprocess.Popen(["python", "Del.py"])
+
+        self.close()
+
+    def start_relocate(self):
+        subprocess.Popen(["python", "Relocate.py"])
 
         self.close()
 
