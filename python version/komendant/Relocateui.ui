@@ -52,7 +52,7 @@
      <string>Отмена</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -80,11 +80,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="CBKogo"/>
+      <widget class="QComboBox" name="CBKogo">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>240</x>

@@ -1,15 +1,15 @@
 import configparser
-import os
 import sys
 import subprocess
-
 import pymysql
 from PyQt5.QtCore import QDate, QRegExp
 from PyQt5.QtGui import QRegExpValidator, QFont
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.uic import loadUiType
+from settings import load_settings
 
 Ui_MainWindow, QMainWindow = loadUiType("Addui.ui")
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -43,22 +43,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         config = configparser.ConfigParser()
         config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
-        self.remote_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conftest.ini'
-        if os.path.exists(self.remote_file_path):
-            remote_config = configparser.ConfigParser()
-            remote_config.read(self.remote_file_path)
-            self.server = remote_config.get('Connection', 'Server')
-            self.user = remote_config.get('Connection', 'User')
-            self.password = remote_config.get('Connection', 'Password')
-            self.db = remote_config.get('Connection', 'BD')
+        config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'
+        settings = load_settings(config_file_path)
+
+        if settings is not None:
+            self.server, self.user, self.password, self.db, self.NachUch, self.Uchastok, self.Kladovchik, self.SysAdmin = settings
+            self.connection = pymysql.connect(host=self.server, port=3306, user=self.user, password=self.password,
+                                         db=self.db)
         else:
-            print(f"Файл настроек {self.remote_file_path} не найден.")
+            QMessageBox.warning(self, "Warning", f"Файл настроек {config_file_path} не найден.", QMessageBox.Ok)
             sys.exit()
-        self.connection = pymysql.connect(host=self.server,
-                                     port=3306,
-                                     user=self.user,
-                                     password=self.password,
-                                     db=self.db)
 
         self.CBKuda.currentIndexChanged.connect(self.on_CBKuda_changed)
         self.PBCancel.clicked.connect(self.cancel_pressed)
@@ -88,7 +82,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         selected_house = self.CBHouse.currentText()
         if not selected_house:
             return
-
         table_name = "balki" if self.CBKuda.currentText() == "Балки" else "obchaga"
         query = f"SELECT DISTINCT `Кол_во_мест`, `ФИО_сотрудника` FROM {table_name} WHERE `Номер` = '{selected_house}'"
         cur = self.connection.cursor()
@@ -96,13 +89,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         results = cur.fetchall()
         unique_values = set(result[0] for result in results)
         fio_values = set(result[1] for result in results)
-
         self.LMest.setText('\n'.join(unique_values))
         self.PTEStatus.clear()
         self.PTEStatus.setPlainText('\n'.join(fio_values))
-
         num_lmest = int(self.LMest.text()) if self.LMest.text().isdigit() else 0
-
         if len(fio_values) > num_lmest:
             self.LMest.setStyleSheet("color: red;")
             font = QFont()
@@ -128,9 +118,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def validate_phone(self):
         text = self.LETelefone.text()
-
         phone_digits = ''.join(filter(str.isdigit, text))
-
         if len(phone_digits) == 11:
             formatted_phone = '8({}){}-{}-{}'.format(phone_digits[1:4], phone_digits[4:7], phone_digits[7:9],
                                                      phone_digits[9:11])
@@ -138,12 +126,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def save_to_db(self):
         table_name = "balki" if self.CBKuda.currentText() == "Балки" else "obchaga"
-
         formatted_date = self.DEDateZaezda.date().toString("dd.MM.yyyy")
-
         if self.PTEStatus.toPlainText().count('\n') >= int(self.LMest.text()):
             confirmation = QMessageBox.question(self, 'Предупреждение',
-                                                'В данном помещении уже проживает максимальное количество людей. Вы точно хотите добавить еще?',
+                                                'В данном помещении уже проживает максимальное количество людей. Вы '
+                                                'точно хотите добавить еще?',
                                                 QMessageBox.Ok | QMessageBox.Cancel)
             if confirmation == QMessageBox.Ok:
                 query = f"""INSERT INTO {table_name} 
@@ -155,11 +142,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 '{formatted_date}',
                                 '{self.CBDolznost.currentText()}', '{self.CBCompany.currentText()}',
                                 '{self.LETelefone.text()}')"""
-
                 cur = self.connection.cursor()
                 cur.execute(query)
                 self.connection.commit()
-
                 self.close()
         else:
             query = f"""INSERT INTO {table_name} 
@@ -171,21 +156,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                             '{formatted_date}',
                                             '{self.CBDolznost.currentText()}', '{self.CBCompany.currentText()}',
                                             '{self.LETelefone.text()}')"""
-
             cur = self.connection.cursor()
             cur.execute(query)
             self.connection.commit()
-
             self.close()
 
     def cancel_pressed(self):
         self.close()
 
     def closeEvent(self, event):
-
         subprocess.Popen(["python", "mainwindow.py"])
-
         self.close()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

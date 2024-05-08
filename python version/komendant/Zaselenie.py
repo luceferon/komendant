@@ -13,6 +13,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QRegExpValida
 from PyQt5.QtCore import Qt, QDate, QRegExp
 import sys
 import os
+from settings import load_settings
 
 from openpyxl.reader.excel import load_workbook
 
@@ -22,7 +23,6 @@ Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
 
 class ExcelPrinter:
     def __init__(self, server_address, smb_share):
-        # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
         config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
@@ -31,7 +31,6 @@ class ExcelPrinter:
     def print_excel_file(self, file_path):
         workbook = load_workbook(file_path)
         worksheet = workbook.active or workbook['Sheet1']
-
         excel = win32com.client.Dispatch("Excel.Application")
         excel.Visible = False
         workbook = excel.Workbooks.Open(file_path)
@@ -44,33 +43,24 @@ class ExcelPrinter:
 class PhoneNumberInputDialog(QDialog):
     def __init__(self, initial_phone=None):
         super().__init__()
-
         self.setWindowTitle("Телефон")
-
         layout = QVBoxLayout()
-
         self.phone_input = QLineEdit()
         self.phone_input.setPlaceholderText("Введите номер телефона в формате 8(***)***-**-**")
         self.phone_input.setValidator(
             QRegExpValidator(QRegExp(r'^(\d{1})[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})$')))
         self.phone_input.textChanged.connect(self.validate_phone)
         layout.addWidget(self.phone_input)
-
         self.ok_button = QPushButton('OK')
         self.ok_button.clicked.connect(self.accept)
         layout.addWidget(self.ok_button)
-
         self.setLayout(layout)
-
         if initial_phone:
             self.phone_input.setText(initial_phone)
 
     def validate_phone(self):
         text = self.phone_input.text()
-
-        # Remove all non-digit characters
         phone_digits = ''.join(filter(str.isdigit, text))
-
         if len(phone_digits) == 11:
             formatted_phone = '8({}){}-{}-{}'.format(phone_digits[1:4], phone_digits[4:7], phone_digits[7:9],
                                                      phone_digits[9:11])
@@ -84,20 +74,14 @@ class PhoneNumberInputDialog(QDialog):
 class DateInputDialog(QDialog):
     def __init__(self, initial_date=None):
         super().__init__()
-
         self.setWindowTitle("Дата")
-
         layout = QVBoxLayout()
-
         self.cal = QCalendarWidget()
         layout.addWidget(self.cal)
-
         self.ok_button = QPushButton('OK')
         self.ok_button.clicked.connect(self.accept)
         layout.addWidget(self.ok_button)
-
         self.setLayout(layout)
-
         if initial_date:
             self.cal.setSelectedDate(initial_date)
 
@@ -110,20 +94,15 @@ class ExportDialog(QDialog):
     def __init__(self, columns):
         super().__init__()
         self.setWindowTitle("Выберите столбцы для экспорта")
-
         self.layout = QVBoxLayout()
-
         for i, column in enumerate(columns):
             checkbox = QCheckBox(column)
             self.layout.addWidget(checkbox)
             setattr(self, f"cb_{i}", checkbox)
-
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-
         self.layout.addWidget(self.buttonBox)
-
         self.setLayout(self.layout)
 
 
@@ -136,71 +115,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.smb_share = '\\smb_share\\komendant\\'
         self.setupUi(self)
         self.state_obhod = 'Отпуск'
-
-        # Подключение слота для кнопки BExit
         self.PBclose.clicked.connect(self.close)
-
         self.PBZP.clicked.connect(self.zpwindow)
-
         self.PBOtpusk.clicked.connect(self.otpusk_dialog)
-
-        # Обработчик двойного щелчка по ячейке в 8 столбце таблицы
         self.TVBalki.doubleClicked.connect(self.phone_double_clicked)
         self.TVObchaga.doubleClicked.connect(self.phone_double_clicked)
-
-        # Обработчик двойного щелчка по ячейке в 5 столбце таблицы
         self.TVBalki.doubleClicked.connect(self.edit_date_balki)
         self.TVObchaga.doubleClicked.connect(self.edit_date_obchaga)
 
-        # Получение адреса сервера из файла настроек
         config = configparser.ConfigParser()
         config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
+        config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'
+        settings = load_settings(config_file_path)
 
-        # Получение настроек подключения к базе данных с удаленного сервера
-        self.remote_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conftest.ini'
-        if os.path.exists(self.remote_file_path):
-            remote_config = configparser.ConfigParser()
-            remote_config.read(self.remote_file_path)
-            self.server = remote_config.get('Connection', 'Server')
-            self.user = remote_config.get('Connection', 'User')
-            self.password = remote_config.get('Connection', 'Password')
-            self.db = remote_config.get('Connection', 'BD')
-            self.NachUch = remote_config.get('Uchastok', 'NachUch')
-            self.Uchastok = remote_config.get('Uchastok', 'Uchastok')
-            self.Kladovchik = remote_config.get('Uchastok', 'Kladovchik')
-            self.SysAdmin = remote_config.get('Uchastok', 'SysAdmin')
-
+        if settings is not None:
+            self.server, self.user, self.password, self.db, self.NachUch, self.Uchastok, self.Kladovchik, self.SysAdmin = settings
+            connection = pymysql.connect(host=self.server, port=3306, user=self.user, password=self.password, db=self.db)
         else:
-            print(f"Файл настроек {self.remote_file_path} не найден.")
+            QMessageBox.warning(self, "Warning", f"Файл настроек {config_file_path} не найден.", QMessageBox.Ok)
             sys.exit()
 
-        # Подключение к базе данных MariaDB
-        connection = pymysql.connect(host=self.server,
-                                     port=3306,
-                                     user=self.user,
-                                     password=self.password,
-                                     db=self.db)
-
-        # Получение данных из таблицы balki и obchaga
         self.cursor = connection.cursor()
         self.cursor.execute('SELECT * FROM balki')
         self.data = self.cursor.fetchall()
         self.cursor.execute('SELECT * FROM obchaga')
         self.data_obchaga = self.cursor.fetchall()
 
-        # Создание модели данных для таблицы
         model = QStandardItemModel()
         model_obchaga = QStandardItemModel()
 
-        # Добавление заголовков столбцов и запрет редактирования
         self.headers = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
                         'Организация', 'Контактный_телефон', ]
         for header in self.headers:
             item = QStandardItem(header)
             item.setEditable(False)
             model.setHorizontalHeaderItem(self.headers.index(header), item)
-
         self.headers_obchaga = ['Номер', 'Кол-во_мест', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска',
                                 'Должность',
                                 'Организация', 'Контактный_телефон', ]
@@ -209,62 +159,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             item.setEditable(False)
             model_obchaga.setHorizontalHeaderItem(self.headers_obchaga.index(header), item)
 
-        # Добавление данных в модель и запрет редактирования ячеек
         def custom_sort_key(x):
             value = x[0]
             try:
                 return (int(value), "")
             except ValueError:
                 return (
-                float("inf"), value)
+                    float("inf"), value)
 
-        sorted_data = sorted(self.data, key=lambda x: custom_sort_key(x))  # Сортировка данных
+        sorted_data = sorted(self.data, key=lambda x: custom_sort_key(x))
         for row_data in sorted_data:
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                if column_index == 3:  # Разрешаем редактирование только для 4 столбца
+                if column_index == 3:
                     item.setEditable(True)
                 else:
                     item.setEditable(False)
                 row.append(item)
             model.appendRow(row)
-
-        sorted_data_obchaga = sorted(self.data_obchaga, key=lambda x: custom_sort_key(x))  # Сортировка данных
+        sorted_data_obchaga = sorted(self.data_obchaga, key=lambda x: custom_sort_key(x))
         for row_data in sorted_data_obchaga:
             row = []
             for column_index, column_data in enumerate(row_data):
                 item = QStandardItem(str(column_data))
-                if column_index == 3:  # Разрешаем редактирование только для 4 столбца
+                if column_index == 3:
                     item.setEditable(True)
                 else:
                     item.setEditable(False)
                 row.append(item)
             model_obchaga.appendRow(row)
 
-        # Установка модели данных для таблицы
         self.TVBalki.setModel(model)
         self.TVObchaga.setModel(model_obchaga)
-
-        # Автоматическая подстройка ширины ячеек таблицы
         self.TVBalki.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.TVObchaga.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
-        # Подключение слота для кнопки PBExport
         self.PBExport.clicked.connect(self.export_data)
-
-        # Закрытие соединения с базой данных
         self.cursor.close()
         connection.close()
 
-        # Подключение сигнала изменения текста в поле ввода к методу поиска
         self.LESearch.textChanged.connect(self.searchTable)
 
         def search_and_highlight():
-            search_text = "отпуск"  # Искомое слово
-            today = datetime.now().date()  # Сегодняшняя дата
+            # поиск и подсветка отпускников и опасдунов
+            search_text = "отпуск"
+            today = datetime.now().date()
             date_regex = r"(\d{2}\.\d{2}\.\d{4}) - (\d{2}\.\d{2}\.\d{4})|(\d{2}\.\d{2}\.\d{4})"
-
             for row in range(self.TVBalki.model().rowCount()):
                 item = self.TVBalki.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
@@ -274,7 +214,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     match = re.match(date_regex, date_item.text())
                     if match:
                         if match.group(3):  # Дата в формате "дд.мм.гггг"
-                            pass  # Ничего не делаем
+                            pass
                         else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
                             start_date_str = match.group(1)  # Начальная дата
                             end_date_str = match.group(2)  # Конечная дата
@@ -285,7 +225,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             end_date = datetime.strptime(end_date_str, '%d.%m.%Y').date()
                             if end_date < today:
                                 date_item.setBackground(QColor('red'))
-
             for row in range(self.TVObchaga.model().rowCount()):
                 item = self.TVObchaga.model().item(row, 3)
                 if item and re.search(search_text, item.text().lower()):
@@ -295,7 +234,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     match = re.match(date_regex, date_item.text())
                     if match:
                         if match.group(3):  # Дата в формате "дд.мм.гггг"
-                            pass  # Ничего не делаем
+                            pass
                         else:  # Дата в формате "дд.мм.гггг - дд.мм.гггг"
                             start_date_str = match.group(1)
                             end_date_str = match.group(2)
@@ -321,206 +260,139 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # Редактируем дату
     def edit_date_balki(self, index):
         current_date_str = index.model().data(index, Qt.DisplayRole)
-
         if not current_date_str:
             return
-
         dates = current_date_str.split(' - ')  # Проверяем формат "дд.мм.гггг - дд.мм.гггг"
         if len(dates) == 2:
             current_date_str = dates[0]
-
         try:
             current_date = datetime.strptime(current_date_str, '%d.%m.%Y').date()
         except ValueError:
             return
-
         dialog = DateInputDialog(QDate.fromString(current_date_str, 'dd.MM.yyyy'))
-
         if dialog.exec_() == QDialog.Accepted:
             new_date = dialog.dateValue().toString('dd.MM.yyyy')
-
             if len(dates) == 2:
                 new_date_str = f'{new_date}'
             else:
                 new_date_str = new_date
-
             index.model().setData(index, new_date_str, Qt.DisplayRole)
 
     # Редактируем дату
     def edit_date_obchaga(self, index):
         current_date_str = index.model().data(index, Qt.DisplayRole)
-
         if not current_date_str:
             return
-
         dates = current_date_str.split(' - ')  # Проверяем формат "дд.мм.гггг - дд.мм.гггг"
         if len(dates) == 2:
             current_date_str = dates[0]
-
         try:
             current_date = datetime.strptime(current_date_str, '%d.%m.%Y').date()
         except ValueError:
             return
-
         dialog = DateInputDialog(QDate.fromString(current_date_str, 'dd.MM.yyyy'))
-
         if dialog.exec_() == QDialog.Accepted:
             new_date = dialog.dateValue().toString('dd.MM.yyyy')
-
             if len(dates) == 2:
                 new_date_str = f'{new_date}'
             else:
                 new_date_str = new_date
-
             index.model().setData(index, new_date_str, Qt.DisplayRole)
 
+    # Экспорт в эксель списка сотрудников
     def export_data(self):
         columns = ['Номер', 'ФИО_сотрудника', 'Комментарий', 'Дата_заезда_отпуска', 'Должность',
                    'Организация', 'Контактный_телефон', ]
-        # Создание диалогового окна для выбора столбцов
         export_dialog = ExportDialog(columns)
         result = export_dialog.exec_()
-
         if result == QDialog.Accepted:
             selected_columns = []
             for i, column in enumerate(columns):
                 if getattr(export_dialog, f"cb_{i}").isChecked():
                     selected_columns.append(column)
-
-            # Создание файла Excel и экспорт данных
             workbook = xlsxwriter.Workbook('C:\Комендант\Списки сотрудников.xlsx')
             worksheet = workbook.add_worksheet()
-
             bold = workbook.add_format({'bold': True})
             header_format = workbook.add_format(
                 {'font_name': 'Arial', 'font_size': 12, 'text_wrap': False, 'align': 'center'})
-
-            # Запись заголовков столбцов
             for col, column in enumerate(selected_columns, start=1):
                 worksheet.write(0, col, column, header_format)
-
-            # Запись данных из таблицы balki
             row = 1
             for data_row in self.data:
                 col = 1
                 for column in selected_columns:
                     col_index = self.headers.index(column)
                     data = data_row[col_index]
-
                     if isinstance(data, str) and len(data) > 50:
                         worksheet.set_column(col, col, 30)
                     elif isinstance(data, int) or isinstance(data, float):
                         worksheet.set_column(col, col, 10)
-
                     worksheet.write(row, col, data_row[col_index])
                     col += 1
                 row += 1
-
-            # Запись данных из таблицы obchaga
             for data_row in self.data_obchaga:
                 col = 1
                 for column in selected_columns:
                     col_index = self.headers_obchaga.index(column)
-
                     data = data_row[col_index]
-
                     if isinstance(data, str) and len(data) > 50:
                         worksheet.set_column(col, col, 30)
                     elif isinstance(data, int) or isinstance(data, float):
                         worksheet.set_column(col, col, 10)
-
                     worksheet.write(row, col, data_row[col_index])
                     col += 1
                 row += 1
-
             workbook.close()
-
-            # Вывод сообщения об успешном экспорте
             QMessageBox.information(self, "Экспорт завершен",
                                     "Данные успешно экспортированы в файл 'C:\Комендант\Списки сотрудников.xlsx'.")
 
     def searchTable(self, searchText):
-        # Получение текущего индекса выбранной строки
+        # Поиск по таблицам
         currentIndex = self.TVBalki.currentIndex()
-
-        # Получение количества строк в модели
         rowCount = self.TVBalki.model().rowCount()
-
-        # Проверка наличия элементов в модели
         if rowCount > 0:
-            # Сброс выделения всех строк перед поиском
             for row in range(rowCount):
                 self.TVBalki.model().setData(self.TVBalki.model().index(row, 2), QColor("white"), Qt.BackgroundRole)
-
-            # Проход по всем строкам и поиск совпадений
             for row in range(rowCount):
-                # Получение ячеек текущей строки
                 item = self.TVBalki.model().item(row, 2)
                 if item is not None:
-                    # Проверка наличия совпадений в ячейке
                     if searchText.lower() in item.text().lower():
-                        # Подсветка строки при нахождении совпадения
                         self.TVBalki.model().setData(self.TVBalki.model().index(row, 2), QColor("yellow"),
                                                      Qt.BackgroundRole)
-
-            # Выделение первой найденной строки
             if rowCount > 0:
                 for row in range(rowCount):
                     if self.TVBalki.model().item(row, 2).text().lower().find(searchText.lower()) != -1:
                         self.TVBalki.setCurrentIndex(self.TVBalki.model().index(row, 0))
                         break
-
             rowCount_obchaga = self.TVObchaga.model().rowCount()
             if rowCount_obchaga > 0:
-                # Сброс выделения всех строк перед поиском
                 for row in range(rowCount_obchaga):
                     self.TVObchaga.model().setData(self.TVObchaga.model().index(row, 2), QColor("white"),
                                                    Qt.BackgroundRole)
-
-                # Проход по всем строкам и поиск совпадений
                 for row in range(rowCount_obchaga):
-                    # Получение ячеек текущей строки
                     item = self.TVObchaga.model().item(row, 2)
                     if item is not None:
-                        # Проверка наличия совпадений в ячейке
                         if searchText.lower() in item.text().lower():
-                            # Подсветка строки при нахождении совпадения
                             self.TVObchaga.model().setData(self.TVObchaga.model().index(row, 2), QColor("yellow"),
                                                            Qt.BackgroundRole)
-
-                # Выделение первой найденной строки
                 if rowCount_obchaga > 0:
                     for row in range(rowCount_obchaga):
                         if self.TVObchaga.model().item(row, 2).text().lower().find(searchText.lower()) != -1:
                             self.TVObchaga.setCurrentIndex(self.TVObchaga.model().index(row, 0))
                             break
-
-            # Восстановление выбранной строки после поиска
             if currentIndex.isValid():
                 self.TVBalki.setCurrentIndex(currentIndex)
         else:
             print("Модель данных пуста.")
-
-        # Проверка наличия текста в поле ввода
         if searchText == "":
-            # Сброс выделения всех строк после очистки поля ввода
             for row in range(rowCount):
                 self.TVBalki.model().setData(self.TVBalki.model().index(row, 2), QColor("white"),
                                              Qt.BackgroundRole)
 
     def save_data_to_db(self):
-        # Подключение к базе данных MariaDB
-        connection = pymysql.connect(host=self.server,
-                                     port=3306,
-                                     user=self.user,
-                                     password=self.password,
-                                     db=self.db)
+        connection = pymysql.connect(host=self.server, port=3306, user=self.user, password=self.password, db=self.db)
         self.cursor = connection.cursor()
-
-        # Удаление всех записей из таблицы balki
         self.cursor.execute('DELETE FROM balki')
-
-        # Получение данных из таблицы balki
         model = self.TVBalki.model()
         rows = model.rowCount()
         for row in range(rows):
@@ -529,11 +401,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 item = model.item(row, column)
                 data.append(item.text())
             self.cursor.execute('INSERT INTO balki VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', data)
-
-        # Удаление всех записей из таблицы obchaga
         self.cursor.execute('DELETE FROM obchaga')
-
-        # Получение данных из таблицы obchaga
         model_obchaga = self.TVObchaga.model()
         rows_obchaga = model_obchaga.rowCount()
         for row in range(rows_obchaga):
@@ -542,26 +410,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 item = model_obchaga.item(row, column)
                 data.append(item.text())
             self.cursor.execute('INSERT INTO obchaga VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', data)
-
-        # Сохранение изменений в базе данных
         connection.commit()
-
-        # Закрытие соединения с базой данных
         self.cursor.close()
         connection.close()
 
     def zpwindow(self, event):
-
         self.save_data_to_db()
-
         subprocess.Popen(["python", "ZP.py"])
 
     def otpusk_dialog(self):
         dialog = QDialog()
         ui = Ui_Dialog()
         ui.setupUi(dialog)
-
-        # Установка значений по умолчанию для DENachalo и DEKonec
         current_date = datetime.now().date()
         ui.DENachalo.setDate(current_date)
         ui.DEKonec.setDate(current_date + timedelta(days=30))  # Добавляем месяц (30 дней)
@@ -596,12 +456,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             selected_index = self.TVBalki.selectedIndexes()[0]
         elif self.tabWidget.currentIndex() == 1:  # вкладка tabObchaga
             selected_index = self.TVObchaga.selectedIndexes()[0]
-
         if selected_index is not None:
             if selected_index.column() == 2:  # проверка что выбрана ячейка в столбце ФИО
                 self.FIO = selected_index.data()
                 self.Dolznost = selected_index.sibling(selected_index.row(), 5).data()
                 self.Company = selected_index.sibling(selected_index.row(), 6).data()
+
                 def handle_button_click():
                     self.Dni = ui.SBDni.value()
                     self.Uval = ui.CBUval.isChecked()
@@ -648,11 +508,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QMessageBox.warning(self, "Warning", "Необходимо выбрать сотрудника", QMessageBox.Ok)
         else:
             QMessageBox.warning(self, "Warning", "Необходимо выбрать сотрудника", QMessageBox.Ok)
-
         return self.FIO, self.Dolznost, self.Company
 
     def print_doc_zpotpusk(self, file_path):
-        # Открытие файла с изменением атрибутов для доступа
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
 
@@ -697,7 +555,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer.print_excel_file(file_path)
 
     def print_doc_otpusk(self, file_path):
-        # Открытие файла с изменением атрибутов для доступа
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
 
@@ -772,7 +629,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer.print_excel_file(file_path)
 
     def print_doc_uval(self, file_path):
-
         current_date = datetime.now().date()
         print_data = current_date.strftime('%d.%m.%Y')
 
@@ -822,12 +678,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         printer.print_excel_file(file_path)
 
     def closeEvent(self, event):
-
         self.save_data_to_db()
-
-        # Запуск Zaselenie.py
         subprocess.Popen(["python", "mainwindow.py"])
-
         self.close()
 
 

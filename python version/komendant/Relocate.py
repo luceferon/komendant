@@ -1,10 +1,10 @@
 import configparser
-import os
 import sys
 import subprocess
 import pymysql
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.uic import loadUiType
+from settings import load_settings
 
 Ui_MainWindow, QMainWindow = loadUiType("Relocateui.ui")
 
@@ -27,22 +27,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         config = configparser.ConfigParser()
         config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
-        self.remote_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conftest.ini'
-        if os.path.exists(self.remote_file_path):
-            remote_config = configparser.ConfigParser()
-            remote_config.read(self.remote_file_path)
-            self.server = remote_config.get('Connection', 'Server')
-            self.user = remote_config.get('Connection', 'User')
-            self.password = remote_config.get('Connection', 'Password')
-            self.db = remote_config.get('Connection', 'BD')
+        config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'
+        settings = load_settings(config_file_path)
+        if settings is not None:
+            self.server, self.user, self.password, self.db, self.NachUch, self.Uchastok, self.Kladovchik, self.SysAdmin = settings
+            self.connection = pymysql.connect(host=self.server, port=3306, user=self.user, password=self.password,
+                                         db=self.db)
         else:
-            QMessageBox.warning(self, "Warning", f"Файл настроек {self.remote_file_path} не найден.", QMessageBox.Ok)
+            QMessageBox.warning(self, "Warning", f"Файл настроек {config_file_path} не найден.", QMessageBox.Ok)
             sys.exit()
-        self.connection = pymysql.connect(host=self.server,
-                                          port=3306,
-                                          user=self.user,
-                                          password=self.password,
-                                          db=self.db)
 
         self.CBOtkuda.currentIndexChanged.connect(self.CBOtkuda_changed)
         self.PBCancel.clicked.connect(self.start_main)
@@ -110,14 +103,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def PBOk_clicked(self):
         selected_name = self.CBKogo.currentText()
         selected_table = "balki" if self.CBOtkuda.currentText() == "Балки" else "obchaga"
-
-        # Delete record from selected table where ФИО_сотрудника matches selected_name
         delete_query = f"DELETE FROM {self.current_table_otkuda} WHERE `ФИО_сотрудника` = '{selected_name}'"
         cur_delete = self.connection.cursor()
         cur_delete.execute(delete_query)
         self.connection.commit()
-
-        # Insert new record into CBKuda table with relevant columns
         insert_query = (f"INSERT INTO {self.current_table_kuda} (`Номер`, `Кол_во_мест`, `ФИО_сотрудника`, "
                         f"`Комментарий`, `Дата_заезда_отпуска`, `Должность`, `Организация`, `Контактный_тел"
                         f"ефон`) VALUES ('{self.CBKuda_House.currentText()}', {self.mesto}, '"
