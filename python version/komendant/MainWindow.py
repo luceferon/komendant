@@ -19,7 +19,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.BViselit.clicked.connect(self.start_del)
 
-        self.BPereseli.clicked.connect(self.start_relocate())
+        self.BPereselit.clicked.connect(self.start_relocate)
 
     def start_zaselenie(self):
         subprocess.Popen(["python", "Zaselenie.py"])
