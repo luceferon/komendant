@@ -21,7 +21,7 @@ Ui_MainWindow, QMainWindow = loadUiType("ZPui.ui")
 class ExcelPrinter:
     def __init__(self, server_address, smb_share):
         config = configparser.ConfigParser()
-        config.read('conf_prog.ini')
+        config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
         self.server_address = server_address
         self.smb_share = '\\smb_share\\komendant\\'
@@ -46,7 +46,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.PBAdd.clicked.connect(self.addNewRow)
         self.PBUncheck.clicked.connect(self.uncheckAllItems)
         config = configparser.ConfigParser()
-        config.read('conf_prog.ini')
+        config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
         self.smb_share = '\\smb_share\\komendant\\'
         config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'

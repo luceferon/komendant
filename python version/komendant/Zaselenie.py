@@ -24,7 +24,7 @@ Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
 class ExcelPrinter:
     def __init__(self, server_address, smb_share):
         config = configparser.ConfigParser()
-        config.read('conf_prog.ini')
+        config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
         self.smb_share = '\\smb_share\\komendant\\'
 
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.TVObchaga.doubleClicked.connect(self.edit_date_obchaga)
 
         config = configparser.ConfigParser()
-        config.read('conf_prog.ini')
+        config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
         config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'
         settings = load_settings(config_file_path)

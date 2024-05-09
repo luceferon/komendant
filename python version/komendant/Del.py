@@ -18,7 +18,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.CBOtkuda.addItems(["Балки", "Общага"])
         # Указываем подключение к БД
         config = configparser.ConfigParser()
-        config.read('conf_prog.ini')
+        config.read('conf.ini')
         self.server_address = config.get('FileServ', 'server')
         config_file_path = f'\\\\{self.server_address}\\smb_share\\komendant\\conf.ini'
         settings = load_settings(config_file_path)
