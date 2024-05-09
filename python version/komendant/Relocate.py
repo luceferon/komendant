@@ -1,6 +1,5 @@
 import configparser
 import sys
-import subprocess
 import pymysql
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.uic import loadUiType
@@ -23,6 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.CBKuda.addItems(["Балки", "Общага"])
         self.CBKuda.setEnabled(False)
         self.CBKuda_House.setEnabled(False)
+        self.PBOk.setEnabled(False)
 
         config = configparser.ConfigParser()
         config.read('conf.ini')
@@ -99,6 +99,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.selected_row_house = cur.fetchone()
         if self.selected_row_house:
             self.mesto = self.selected_row_house[0]
+        self.PBOk.setEnabled(True)
 
     def PBOk_clicked(self):
         selected_name = self.CBKogo.currentText()
@@ -121,7 +122,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.close()
 
     def closeEvent(self, event):
-        subprocess.Popen(["python", "mainwindow.py"])
         self.close()
 
 

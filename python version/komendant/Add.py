@@ -1,6 +1,5 @@
 import configparser
 import sys
-import subprocess
 import pymysql
 from PyQt5.QtCore import QDate, QRegExp
 from PyQt5.QtGui import QRegExpValidator, QFont
@@ -165,7 +164,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.close()
 
     def closeEvent(self, event):
-        subprocess.Popen(["python", "mainwindow.py"])
         self.close()
 
 

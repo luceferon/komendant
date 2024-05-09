@@ -1,6 +1,5 @@
 import configparser
 import sys
-import subprocess
 import pymysql
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.uic import loadUiType
@@ -63,7 +62,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.close()
 
     def closeEvent(self, event):
-        subprocess.Popen(["python", "mainwindow.py"])
         self.close()
 
 

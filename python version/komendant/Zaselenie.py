@@ -679,7 +679,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event):
         self.save_data_to_db()
-        subprocess.Popen(["python", "mainwindow.py"])
         self.close()
 
 

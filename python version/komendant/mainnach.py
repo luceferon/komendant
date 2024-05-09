@@ -1,3 +1,4 @@
+import atexit
 import configparser
 import subprocess
 import openpyxl
@@ -20,6 +21,30 @@ from openpyxl.reader.excel import load_workbook
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenieui.ui")
 Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
 
+lock_file = ""  # Путь к файлу блокировки
+
+conf_file = "conf.ini"
+
+
+def read_server_address():
+    config = configparser.ConfigParser()
+    config.read(conf_file)
+    server_address = config.get('FileServ', 'server')
+    return server_address
+
+
+def set_lock_file_path(server_address):
+    global lock_file
+    lock_file = fr"\\{server_address}\smb_share\komendant\lockfile.lock"
+
+
+def create_lock():
+    open(lock_file, 'w').close()
+
+
+def remove_lock():
+    if os.path.exists(lock_file):
+        os.remove(lock_file)
 
 class ExcelPrinter:
     def __init__(self, server_address, smb_share):
@@ -59,6 +84,11 @@ class ExportDialog(QDialog):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        if os.path.exists(lock_file):
+            QMessageBox.warning(self, "Warning", f"Приложение уже запущено на другом компьютере!", QMessageBox.Ok)
+            sys.exit(1)
+        else:
+            create_lock()
         self.Company = None
         self.Dolznost = None
         self.FIO = None
@@ -572,7 +602,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
+    server_address = read_server_address()
+    set_lock_file_path(server_address)
+
     app = QApplication(sys.argv)
     window = MainWindow()
+    if not os.path.exists(lock_file):
+        sys.exit(1)  # Выходим из программы, если файл блокировки создан
+    atexit.register(remove_lock)  # Регистрируем функцию для удаления файла блокировки при выходе из программы
     window.show()
     sys.exit(app.exec_())
