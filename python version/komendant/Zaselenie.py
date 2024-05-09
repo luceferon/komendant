@@ -453,9 +453,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         selected_index = None
         if self.tabWidget.currentIndex() == 0:  # вкладка tabBalki
-            selected_index = self.TVBalki.selectedIndexes()[0]
+            if self.TVBalki.selectedIndexes():  # Проверка наличия выделенных ячеек
+                selected_index = self.TVBalki.selectedIndexes()[0]
         elif self.tabWidget.currentIndex() == 1:  # вкладка tabObchaga
-            selected_index = self.TVObchaga.selectedIndexes()[0]
+            if self.TVObchaga.selectedIndexes():  # Проверка наличия выделенных ячеек
+                selected_index = self.TVObchaga.selectedIndexes()[0]
         if selected_index is not None:
             if selected_index.column() == 2:  # проверка что выбрана ячейка в столбце ФИО
                 self.FIO = selected_index.data()
