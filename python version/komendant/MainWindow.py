@@ -8,8 +8,7 @@ from PyQt5.uic import loadUiType
 
 Ui_MainWindow, QMainWindow = loadUiType("MainWindowui.ui")
 
-lock_file = ""  # Путь к файлу блокировки
-
+lock_file = ""
 conf_file = "conf.ini"
 
 

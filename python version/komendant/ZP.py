@@ -4,7 +4,7 @@ from datetime import datetime
 import openpyxl
 import pymysql
 import win32com.client
-from PyQt5.QtWidgets import (QApplication, QHeaderView, QLabel, QMessageBox)
+from PyQt5.QtWidgets import (QApplication, QHeaderView, QMessageBox)
 from PyQt5.uic import loadUiType
 from PyQt5.QtGui import QColor, QStandardItemModel, QStandardItem, QFont
 from PyQt5.QtCore import Qt
@@ -212,7 +212,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             calendar.month_name[12]
         prev_year = current_year if datetime.now().month == 1 else current_year
         sheet['A1'] = f"Список работников на з\плату за {prev_month} {prev_year} г."
-        sheet['C3'] = self.uchastok
+        sheet['C3'] = self.Uchastok
         sheet['C48'] = self.NachUch
         for row_index in range(5, self.model_TBTemp.rowCount() + 5):
             for column_index in range(1, self.model_TBTemp.columnCount() + 1):

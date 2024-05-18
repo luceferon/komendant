@@ -21,8 +21,7 @@ from openpyxl.reader.excel import load_workbook
 Ui_MainWindow, QMainWindow = loadUiType("Zaselenieui.ui")
 Ui_Dialog, QDialog = loadUiType("OtpuskUI.ui")
 
-lock_file = ""  # Путь к файлу блокировки
-
+lock_file = ""
 conf_file = "conf.ini"
 
 
@@ -372,9 +371,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         selected_index = None
         if self.tabWidget.currentIndex() == 0:  # вкладка tabBalki
-            selected_index = self.TVBalki.selectedIndexes()[0]
+            if self.TVBalki.selectedIndexes():  # Проверка наличия выделенных ячеек
+                selected_index = self.TVBalki.selectedIndexes()[0]
         elif self.tabWidget.currentIndex() == 1:  # вкладка tabObchaga
-            selected_index = self.TVObchaga.selectedIndexes()[0]
+            if self.TVObchaga.selectedIndexes():  # Проверка наличия выделенных ячеек
+                selected_index = self.TVObchaga.selectedIndexes()[0]
         if selected_index is not None:
             if selected_index.column() == 2:  # проверка что выбрана ячейка в столбце ФИО
                 self.FIO = selected_index.data()
@@ -438,31 +439,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sheet['A6'] = self.FIO
 
         # Проверка условия для Company
-        if self.Company == 'ООО "А-Сервис"':
+        if self.Company.lower() == 'ООО "А-Сервис"':
             sheet['A3'] = 'ООО "А-Сервис"'
             sheet['A4'] = "Белову В. Ю."
 
-        if self.Company == 'ООО "Еда"':
+        if self.Company.lower() == 'ООО "Еда"':
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
 
-        if self.Company == 'ООО "Комплектсервис"':
+        if self.Company.lower() == 'ООО "Комплектсервис"':
             sheet['A3'] = 'ООО "Комплектсервис"'
             sheet['A4'] = "Потриденный В. Ф."
 
-        if self.Company == 'ООО "МоторСервис"':
+        if self.Company.lower() == 'ООО "МоторСервис"':
             sheet['A3'] = 'ООО "МоторСервис"'
             sheet['A4'] = "Борисюк К. М."
 
-        if self.Company == 'ООО "Сисим"':
+        if self.Company.lower() == 'ООО "Сисим"':
             sheet['A3'] = 'ООО "Сисим"'
             sheet['A4'] = "Ковалькову М. Н."
 
-        if self.Company == 'ООО "СпецПодряд"':
+        if self.Company.lower() == 'ООО "СпецПодряд"':
             sheet['A3'] = 'ООО "СпецПодряд"'
             sheet['A4'] = "Осс А. В."
 
-        if self.Company == 'ООО "КрасИнтегра"':
+        if self.Company.lower() == 'ООО "КрасИнтегра"':
             sheet['A3'] = 'ООО "КрасИнтегра"'
             sheet['A4'] = "Сапину В. Д."
 
@@ -484,31 +485,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sheet['D15'] = f"По  {self.Konec.toString('dd.MM.yyyy')}"
 
         # Проверка условия для Company
-        if self.Company == 'ООО "А-Сервис"':
+        if self.Company.lower() == 'ООО "А-Сервис"':
             sheet['A3'] = 'ООО "А-Сервис"'
             sheet['A4'] = "Белову В. Ю."
 
-        if self.Company == 'ООО "Еда"':
+        if self.Company.lower() == 'ООО "Еда"':
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
 
-        if self.Company == 'ООО "Комплектсервис"':
+        if self.Company.lower() == 'ООО "Комплектсервис"':
             sheet['A3'] = 'ООО "Комплектсервис"'
             sheet['A4'] = "Потриденный В. Ф."
 
-        if self.Company == 'ООО "МоторСервис"':
+        if self.Company.lower() == 'ООО "МоторСервис"':
             sheet['A3'] = 'ООО "МоторСервис"'
             sheet['A4'] = "Борисюк К. М."
 
-        if self.Company == 'ООО "Сисим"':
+        if self.Company.lower() == 'ООО "Сисим"':
             sheet['A3'] = 'ООО "Сисим"'
             sheet['A4'] = "Ковалькову М. Н."
 
-        if self.Company == 'ООО "СпецПодряд"':
+        if self.Company.lower() == 'ООО "СпецПодряд"':
             sheet['A3'] = 'ООО "СпецПодряд"'
             sheet['A4'] = "Осс А. В."
 
-        if self.Company == 'ООО "КрасИнтегра"':
+        if self.Company.lower() == 'ООО "КрасИнтегра"':
             sheet['A3'] = 'ООО "КрасИнтегра"'
             sheet['A4'] = "Сапину В. Д."
 
@@ -561,31 +562,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sheet['A15'] = f"С {print_data}"
 
         # Проверка условия для Company
-        if self.Company == 'ООО "А-Сервис"':
+        if self.Company.lower() == 'ООО "А-Сервис"':
             sheet['A3'] = 'ООО "А-Сервис"'
             sheet['A4'] = "Белову В. Ю."
 
-        if self.Company == 'ООО "Еда"':
+        if self.Company.lower() == 'ООО "Еда"':
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
 
-        if self.Company == 'ООО "Комплектсервис"':
+        if self.Company.lower() == 'ООО "Комплектсервис"':
             sheet['A3'] = 'ООО "Комплектсервис"'
             sheet['A4'] = "Потриденный В. Ф."
 
-        if self.Company == 'ООО "МоторСервис"':
+        if self.Company.lower() == 'ООО "МоторСервис"':
             sheet['A3'] = 'ООО "МоторСервис"'
             sheet['A4'] = "Борисюк К. М."
 
-        if self.Company == 'ООО "Сисим"':
+        if self.Company.lower() == 'ООО "Сисим"':
             sheet['A3'] = 'ООО "Сисим"'
             sheet['A4'] = "Ковалькову М. Н."
 
-        if self.Company == 'ООО "СпецПодряд"':
+        if self.Company.lower() == 'ООО "СпецПодряд"':
             sheet['A3'] = 'ООО "СпецПодряд"'
             sheet['A4'] = "Осс А. В."
 
-        if self.Company == 'ООО "КрасИнтегра"':
+        if self.Company.lower() == 'ООО "КрасИнтегра"':
             sheet['A3'] = 'ООО "КрасИнтегра"'
             sheet['A4'] = "Сапину В. Д."
 
