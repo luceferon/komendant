@@ -402,9 +402,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         zpotpusk_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'zpotpusk.xlsx')
                         self.print_doc_zpotpusk(zpotpusk_doc)
 
-                    # печатаем заявление на обходной
+                    # печатаем обходной
                     if ui.buttonBox.accepted.connect(
                             handle_button_click) and self.Obhod:  # по нажатию ОК проверяем стоит ли галка на CBObhod
+                        self.state_obhod = 'Отпуск'
                         obhod_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'obhod.xlsx')
                         self.print_doc_obhod(obhod_doc)
 
@@ -419,6 +420,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             handle_button_click) and self.Uval:  # по нажатию ОК проверяем стоит ли галка на CBUval
                         uval_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'uval.xlsx')
                         self.print_doc_uval(uval_doc)
+                        self.state_obhod = 'Увольнение'
                         obhod_doc = os.path.join(f'\\\\{self.server_address}\\{self.smb_share}', 'obhod.xlsx')
                         self.print_doc_obhod(obhod_doc)
 
