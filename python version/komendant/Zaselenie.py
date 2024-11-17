@@ -529,6 +529,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
 
+        if self.Company == 'ООО "Буфет"':
+            sheet['A3'] = 'ООО "Буфет"'
+            sheet['A4'] = "Потапову Г. В."
+
+        if self.Company == 'ООО "ГМК Ангара"':
+            sheet['A3'] = 'ООО "ГМК Ангара"'
+            sheet['A4'] = "Калдарумиди Р. П."
+
         if self.Company == 'ООО "КомплектСервис"':
             sheet['A3'] = 'ООО "КомплектСервис"'
             sheet['A4'] = "Потриденный В. Ф."
@@ -574,6 +582,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.Company == 'ООО "Еда"':
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Буфет"':
+            sheet['A3'] = 'ООО "Буфет"'
+            sheet['A4'] = "Потапову Г. В."
+
+        if self.Company == 'ООО "ГМК Ангара"':
+            sheet['A3'] = 'ООО "ГМК Ангара"'
+            sheet['A4'] = "Калдарумиди Р. П."
 
         if self.Company == 'ООО "КомплектСервис"':
             sheet['A3'] = 'ООО "КомплектСервис"'
@@ -651,6 +667,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.Company == 'ООО "Еда"':
             sheet['A3'] = 'ООО "Еда"'
             sheet['A4'] = "Потапову М. Г."
+
+        if self.Company == 'ООО "Буфет"':
+            sheet['A3'] = 'ООО "Буфет"'
+            sheet['A4'] = "Потапову Г. В."
+
+        if self.Company == 'ООО "ГМК Ангара"':
+            sheet['A3'] = 'ООО "ГМК Ангара"'
+            sheet['A4'] = "Калдарумиди Р. П."
 
         if self.Company == 'ООО "КомплектСервис"':
             sheet['A3'] = 'ООО "КомплектСервис"'
