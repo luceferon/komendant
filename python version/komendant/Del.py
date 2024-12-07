@@ -14,7 +14,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.CBOtkuda.addItems(["Балки", "Общага"])
+        self.CBOtkuda.addItems(["", "Балки", "Общага"])
         # Указываем подключение к БД
         config = configparser.ConfigParser()
         config.read('conf.ini')

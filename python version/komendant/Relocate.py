@@ -18,8 +18,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.current_table_otkuda = None
         self.setupUi(self)
 
-        self.CBOtkuda.addItems(["Балки", "Общага"])
-        self.CBKuda.addItems(["Балки", "Общага"])
+        self.CBOtkuda.addItems(["", "Балки", "Общага"])
+        self.CBKuda.addItems(["", "Балки", "Общага"])
         self.CBKuda.setEnabled(False)
         self.CBKuda_House.setEnabled(False)
         self.PBOk.setEnabled(False)
